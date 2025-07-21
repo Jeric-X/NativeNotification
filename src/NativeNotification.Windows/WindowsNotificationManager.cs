@@ -34,14 +34,16 @@ public partial class WindowsNotificationManager : INotificationManager, IDisposa
     public void RomoveAllNotifications()
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(WindowsNotificationManager));
+        _actionManager.Clear();
         ToastNotificationManagerCompat.History.Clear();
     }
 
     [LibraryImport("shell32.dll", SetLastError = true)]
     private static partial void SetCurrentProcessExplicitAppUserModelID([MarshalAs(UnmanagedType.LPWStr)] string appId);
 
-    public static void UnRegistFromCurrentProcess()
+    public void UnRegistFromCurrentProcess()
     {
+        _actionManager.Clear();
         ToastNotificationManagerCompat.Uninstall();
     }
 

@@ -7,6 +7,7 @@ internal class Program
     static INotificationManager Manager { get; } = ManagerFactory.GetNotificationManager();
     static void Main(string[] _)
     {
+        Console.WriteLine("c: clear all notifications");
         Console.WriteLine("0: exit");
         Console.WriteLine("1: Show a 2 seconds duration notification");
         Console.WriteLine("2: Show a notification, no sound, with image.");
@@ -23,6 +24,10 @@ internal class Program
             if (input.Equals("0"))
             {
                 break;
+            }
+            else if (input.Equals("c"))
+            {
+                Manager.RomoveAllNotifications();
             }
             else if (input.Equals("1"))
             {
@@ -94,11 +99,7 @@ internal class Program
             {
                 notification.ProgressValue = i / 100;
                 notification.ProgressValueTip = $"Progress: {i}%";
-                if (!notification.Update())
-                {
-                    notification.Show(new() { Silent = false });
-                }
-
+                notification.Update();
                 await Task.Delay(TimeSpan.FromSeconds(0.5), cts.Token);
             }
             notification.ProgressValueTip = "Complete.";

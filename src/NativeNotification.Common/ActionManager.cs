@@ -42,4 +42,10 @@ public class ActionManager<NotificationIdType> where NotificationIdType : notnul
             AddButton(id, item, session);
         }
     }
+
+    public void Clear()
+    {
+        _handlerList.Clear();
+        _handlerList.Clear();
+    }
 }
