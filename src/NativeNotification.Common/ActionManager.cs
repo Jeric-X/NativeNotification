@@ -4,8 +4,8 @@ namespace NativeNotification.Common;
 
 public class ActionManager<NotificationIdType> where NotificationIdType : notnull
 {
-    private readonly Dictionary<NotificationIdType, Dictionary<string, ActionButton>> _handlerList = [];
-    private readonly Dictionary<NotificationIdType, INotification> _sessionList = [];
+    private Dictionary<NotificationIdType, Dictionary<string, ActionButton>> _handlerList = [];
+    private Dictionary<NotificationIdType, INotificationInternal> _sessionList = [];
 
     public void OnActivated(NotificationIdType id, string buttonId)
     {
@@ -24,18 +24,21 @@ public class ActionManager<NotificationIdType> where NotificationIdType : notnul
     {
         _handlerList.Remove(id);
         _sessionList.Remove(id);
+        if (_sessionList.TryGetValue(id, out var session))
+        {
+            session.SetIsAlive(false);
+        }
     }
 
-    public void AddButton(NotificationIdType id, ActionButton button, INotification session)
+    private void AddButton(NotificationIdType id, ActionButton button, INotificationInternal session)
     {
-        _sessionList.TryAdd(id, session);
         _handlerList.TryAdd(id, []);
 
         var buttonList = _handlerList[id];
         buttonList.TryAdd(button.Uid.ToString(), button);
     }
 
-    public void AddButtons(NotificationIdType id, IEnumerable<ActionButton> buttons, INotification session)
+    private void AddButtons(NotificationIdType id, IEnumerable<ActionButton> buttons, INotificationInternal session)
     {
         foreach (var item in buttons)
         {
@@ -43,9 +46,27 @@ public class ActionManager<NotificationIdType> where NotificationIdType : notnul
         }
     }
 
-    public void Clear()
+    public void AddSession(NotificationIdType id, INotificationInternal session)
     {
-        _handlerList.Clear();
-        _handlerList.Clear();
+        AddButtons(id, session.Buttons, session);
+        _sessionList.TryAdd(id, session);
+    }
+
+    public void Reset()
+    {
+        _handlerList = [];
+        _sessionList = [];
+    }
+
+    public void RemoveAll()
+    {
+        _handlerList = [];
+        var temp = _sessionList;
+        _sessionList = [];
+
+        foreach (var session in temp)
+        {
+            session.Value.Remove();
+        }
     }
 }

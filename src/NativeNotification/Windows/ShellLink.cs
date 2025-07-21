@@ -1,4 +1,6 @@
-﻿using System.Runtime.InteropServices;
+﻿#if WINDOWS
+
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 
@@ -423,3 +425,5 @@ namespace NativeNotification.Windows
         #endregion
     }
 }
+
+#endif

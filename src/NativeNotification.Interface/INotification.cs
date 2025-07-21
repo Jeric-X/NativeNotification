@@ -7,6 +7,7 @@ public interface INotification
     public Uri? Image { get; set; }
     public List<ActionButton> Buttons { get; set; }
 
+    public bool IsAlive { get; }
     public void Show(NotificationConfig? config = null);
 
     /// <summary>

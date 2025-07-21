@@ -1,3 +1,5 @@
+#if WINDOWS
+
 using Microsoft.Toolkit.Uwp.Notifications;
 using NativeNotification.Common;
 using NativeNotification.Interface;
@@ -48,3 +50,4 @@ public class ProgressSession(ToastNotifier notifer, ActionManager<string> callba
         return data;
     }
 }
+#endif

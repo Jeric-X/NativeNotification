@@ -1,4 +1,6 @@
-﻿using Microsoft.Toolkit.Uwp.Notifications;
+﻿#if WINDOWS
+
+using Microsoft.Toolkit.Uwp.Notifications;
 using NativeNotification.Common;
 using NativeNotification.Interface;
 using System.Diagnostics;
@@ -34,7 +36,7 @@ public partial class WindowsNotificationManager : INotificationManager, IDisposa
     public void RomoveAllNotifications()
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(WindowsNotificationManager));
-        _actionManager.Clear();
+        _actionManager.Reset();
         ToastNotificationManagerCompat.History.Clear();
     }
 
@@ -43,7 +45,7 @@ public partial class WindowsNotificationManager : INotificationManager, IDisposa
 
     public void UnRegistFromCurrentProcess()
     {
-        _actionManager.Clear();
+        _actionManager.Reset();
         ToastNotificationManagerCompat.Uninstall();
     }
 
@@ -92,3 +94,5 @@ public partial class WindowsNotificationManager : INotificationManager, IDisposa
         GC.SuppressFinalize(this);
     }
 }
+
+#endif

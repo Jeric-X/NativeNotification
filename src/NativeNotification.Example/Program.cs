@@ -10,7 +10,7 @@ internal class Program
         Console.WriteLine("c: clear all notifications");
         Console.WriteLine("0: exit");
         Console.WriteLine("1: Show a 2 seconds duration notification");
-        Console.WriteLine("2: Show a notification, no sound, with image.");
+        Console.WriteLine("2: Show a notification, no sound, with image and buttons.");
         Console.WriteLine("3: Show a notification with progress bar and button.");
         while (true)
         {
@@ -63,6 +63,14 @@ internal class Program
         notification.Title = "Title";
         notification.Message = "This is a test notification with image.";
         notification.Image = new Uri(Path.GetFullPath("Assets/house.jpg"));
+        notification.Buttons = [
+            new ActionButton("Button1", () => {
+                Console.WriteLine("Button 1Clicked.");
+            }),
+            new ActionButton("Button2", () => {
+                Console.WriteLine("Button2 Clicked.");
+            }),
+        ];
         notification.Show(new NotificationConfig() { Silent = true });
     }
 

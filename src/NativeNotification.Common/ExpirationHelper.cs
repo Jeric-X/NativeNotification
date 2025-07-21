@@ -4,7 +4,7 @@ namespace NativeNotification.Common;
 
 public class ExpirationHelper(INotification session)
 {
-    private static TimeSpan? GetExpirationDuration(NotificationConfig? config)
+    public static TimeSpan? GetExpirationDuration(NotificationConfig? config)
     {
         TimeSpan? timeSpan = null;
         if (config?.ExpirationTime is not null)

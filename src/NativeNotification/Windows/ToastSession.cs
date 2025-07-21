@@ -1,3 +1,5 @@
+#if WINDOWS
+
 using Microsoft.Toolkit.Uwp.Notifications;
 using NativeNotification.Common;
 using NativeNotification.Interface;
@@ -6,12 +8,14 @@ using Windows.UI.Notifications;
 namespace NativeNotification.Windows
 {
     public class ToastSession(ToastNotifier _notifier, ActionManager<string> _actionManager)
-        : INotification
+        : INotification, INotificationInternal
     {
         public string? Title { get; set; }
         public string? Message { get; set; }
         public Uri? Image { get; set; }
         public List<ActionButton> Buttons { get; set; } = [];
+        public bool IsAlive { get; set; } = false;
+        public void SetIsAlive(bool IsAlive) => this.IsAlive = IsAlive;
 
         private ExpirationHelper? _expirationHelper;
         private const string Group = "DEFAULT_GROUP";
@@ -37,7 +41,6 @@ namespace NativeNotification.Windows
             foreach (var button in Buttons)
             {
                 builder.AddButton(button);
-                _actionManager.AddButton(Tag, button, this);
             }
             return builder;
         }
@@ -95,6 +98,7 @@ namespace NativeNotification.Windows
                 builder.AddAudio(null, null, true);
             }
             _notifier.Show(GetToast(builder));
+            _actionManager.AddSession(Tag, this);
             _expirationHelper ??= new ExpirationHelper(this);
             _expirationHelper.SetNoficifationDuration(config);
         }
@@ -111,3 +115,5 @@ namespace NativeNotification.Windows
         }
     }
 }
+
+#endif
