@@ -4,18 +4,46 @@
 		<OutputType>Exe</OutputType>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<BuildOnWin Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</BuildOnWin>
+		<BuildOnMac Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</BuildOnMac>
+		<BuildOnLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</BuildOnLinux>
 	</PropertyGroup>
-	<PropertyGroup Condition=" '$(OS)' != 'Windows_NT' ">
-		<TargetFramework>net8.0</TargetFramework>
+
+	<PropertyGroup Condition="'$(BuildOnMac)'=='true'">
+		<TargetFrameworks>net8.0-macos</TargetFrameworks>
 	</PropertyGroup>
-	<PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
-		<TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
+	<PropertyGroup Condition="'$(BuildOnLinux)'=='true'">
+		<TargetFrameworks>net8.0</TargetFrameworks>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(BuildOnWin)'=='true'">
+		<TargetFrameworks>net8.0;net8.0-windows10.0.17763.0;net8.0-macos</TargetFrameworks>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(BuildOnMac)'=='true'">
+		<ApplicationId>xyz.jericx.nativeNotification.example</ApplicationId>
+		<SupportedOSPlatformVersion>10.15</SupportedOSPlatformVersion>
+		<CreatePackage>false</CreatePackage>
 	</PropertyGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\NativeNotification\NativeNotification.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="Assets\house.jpg" CopyToOutputDirectory="PreserveNewest" />
+		<None Update="Assets\house.jpg"
+			CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
+
+  <!-- <Target Name="CopyInfoPlist" AfterTargets="Build">
+    <ItemGroup>
+      <LicenseFiles Include="$(ProjectDir)\..\..\LICENSES\**\*.*" />
+    </ItemGroup>
+    <Copy
+	  SourceFiles
+      SourceFiles="@(LicenseFiles)"
+      DestinationFolder="$(OutDir)\SyncClipboard.Desktop.MacOS.app\Contents\MonoBundle\LICENSES\%(RecursiveDir)"
+      SkipUnchangedFiles="true"
+      OverwriteReadOnlyFiles="true"
+      Retries="3"
+      RetryDelayMilliseconds="300"/>
+  </Target> -->
 </Project>

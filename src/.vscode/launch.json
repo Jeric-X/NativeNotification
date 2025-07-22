@@ -5,10 +5,27 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "C#: NativeNotification.Example Debug",
+            "name": "Debug",
             "type": "dotnet",
             "request": "launch",
-            "projectPath": "${workspaceFolder}/NativeNotification.Example/NativeNotification.Example.csproj"
-        }
+            "projectPath": "${workspaceFolder}/NativeNotification.Example/NativeNotification.Example.csproj",
+            "preLaunchTask": "build",
+        },
+        {
+            "name": "DebugMacos",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build macOS",
+            "program": "${workspaceFolder}/NativeNotification.Example/bin/Debug/net8.0-macos/osx-x64/NativeNotification.Example.app/Contents/MacOS/NativeNotification.Example",
+            // "program": "dotnet",
+            // "args": [
+            //     // "${workspaceFolder}/NativeNotification.Example/bin/Debug/net8.0-macos/osx-x64/NativeNotification.Example.dll",
+            //     "${workspaceFolder}/NativeNotification.Example/bin/Debug/net8.0-macos/osx-x64/NativeNotification.Example.app/Contents/MonoBundle/NativeNotification.Example.dll"
+            // ],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "internalConsoleOptions": "openOnSessionStart",
+        },
     ]
 }

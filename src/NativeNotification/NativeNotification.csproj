@@ -4,8 +4,15 @@
 		<TargetFrameworks>net8.0;net8.0-windows10.0.17763.0;net8.0-macos</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<BuildOnWin Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</BuildOnWin>
+		<BuildOnMac Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</BuildOnMac>
+		<BuildOnLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</BuildOnLinux>
 	</PropertyGroup>
-	<PropertyGroup Condition=" '$(OS)' != 'Windows_NT' ">
+
+	<PropertyGroup Condition="'$(BuildOnMac)'=='true'">
+		<TargetFrameworks>net8.0-macos</TargetFrameworks>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(BuildOnLinux)'=='true'">
 		<TargetFrameworks>net8.0</TargetFrameworks>
 	</PropertyGroup>
 

@@ -2,11 +2,10 @@
 
 using NativeNotification.Common;
 using NativeNotification.Interface;
-using NativeNotification.Linux;
 
 namespace NativeNotification.MacOS;
 
-internal class NSNotification(IDbusNotifications _dBusInstance, ActionManager<uint> _actionManager) : INotification, INotificationInternal
+internal class NSNotification(NSUserNotificationCenter _center, ActionManager<string> _actionManager) : INotification, INotificationInternal
 {
     public string? Title { get; set; }
     public string? Message { get; set; }
@@ -16,55 +15,47 @@ internal class NSNotification(IDbusNotifications _dBusInstance, ActionManager<ui
     public void SetIsAlive(bool IsAlive) => this.IsAlive = IsAlive;
 
     private ExpirationHelper? _expirationHelper;
-    private uint? _notificationId;
-    private uint NotificationId => _notificationId ?? 0;
+    private readonly string _notificationId = GetGuid();
     private DateTimeOffset? _expirationTime;
+
+    private static string GetGuid()
+    {
+        return Guid.NewGuid().ToString();
+    }
 
     protected void NativeShow(NotificationConfig? config = null)
     {
-        List<string> actionList = [];
+        config ??= new NotificationConfig();
+        config.ExpirationTime ??= _expirationTime;
+        List<NSUserNotificationAction> actionList = [];
         foreach (var button in Buttons)
         {
-            actionList.Add(button.Uid.ToString());
-            actionList.Add(button.Text);
+            actionList.Add(NSUserNotificationAction.GetAction(button.Uid, button.Text));
         }
 
-        var hintDictionary = new Dictionary<string, object>();
+        var notification = new NSUserNotification
+        {
+            Identifier = _notificationId,
+            Title = Title,
+            InformativeText = Message,
+            SoundName = config?.Silent is true ? null : NSUserNotification.NSUserNotificationDefaultSoundName,
+            AdditionalActions = [.. actionList],
+            HasActionButton = true,
+            ActionButtonTitle = "Action"
+        };
+    
         if (Image is not null)
         {
-            hintDictionary.Add("image-path", Image.AbsoluteUri);
+            notification.ContentImage = new NSImage(Image!);
         }
 
-        if (config?.Silent is true)
-        {
-            hintDictionary.Add("suppress-sound", true);
-        }
-
+        _center.DeliverNotification(notification);
+        _actionManager.AddSession(_notificationId, this);
         var duration = ExpirationHelper.GetExpirationDuration(config);
         if (duration.HasValue)
         {
             _expirationTime = DateTimeOffset.Now.Add(duration.Value);
         }
-        else if (_expirationTime.HasValue)
-        {
-            duration = _expirationTime.Value - DateTimeOffset.Now;
-        }
-
-        _notificationId = Task.Run(async () =>
-            await _dBusInstance.NotifyAsync(
-                _config.AppName,
-                NotificationId,
-                _config.AppIcon,
-                Title ?? string.Empty,
-                Message ?? string.Empty,
-                [.. actionList],
-                hintDictionary,
-                (int?)duration?.TotalMilliseconds ?? 0
-            )
-        ).Result;
-        IsAlive = true;
-
-        _actionManager.AddSession(NotificationId, this);
         _expirationHelper ??= new ExpirationHelper(this);
         _expirationHelper.SetNoficifationDuration(config);
     }
@@ -86,7 +77,8 @@ internal class NSNotification(IDbusNotifications _dBusInstance, ActionManager<ui
 
     public void Remove()
     {
-        _dBusInstance.CloseNotificationAsync(NotificationId);
+        _center.RemoveDeliveredNotification(new NSUserNotification { Identifier = _notificationId });
+        _actionManager.OnClosed(_notificationId);
     }
 }
 

@@ -28,7 +28,7 @@ public class ExpirationHelper(INotification session)
                 ? timeSpan.Value
                 : config.Duration.Value;
         }
-        return null;
+        return timeSpan;
     }
 
     private CancellationTokenSource? _durationCts;
@@ -44,6 +44,20 @@ public class ExpirationHelper(INotification session)
     public async void SetNoficifationDuration(NotificationConfig? config = null)
     {
         var duration = GetExpirationDuration(config);
+        var token = CreateNewDurationCtk();
+        if (duration is not null)
+        {
+            try
+            {
+                await Task.Delay(duration.Value, token).ConfigureAwait(false);
+                session.Remove();
+            }
+            catch { }
+        }
+    }
+
+    public async void SetNoficifationDuration(TimeSpan? duration = null)
+    {
         if (duration is not null)
         {
             var token = CreateNewDurationCtk();
@@ -55,5 +69,4 @@ public class ExpirationHelper(INotification session)
             catch { }
         }
     }
-
 }

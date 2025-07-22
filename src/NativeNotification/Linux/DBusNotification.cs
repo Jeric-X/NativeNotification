@@ -37,15 +37,9 @@ internal class DBusNotification(NotificationManagerConfig _config, IDbusNotifica
             hintDictionary.Add("suppress-sound", true);
         }
 
+        config ??= new NotificationConfig();
+        config.ExpirationTime ??= _expirationTime;
         var duration = ExpirationHelper.GetExpirationDuration(config);
-        if (duration.HasValue)
-        {
-            _expirationTime = DateTimeOffset.Now.Add(duration.Value);
-        }
-        else if (_expirationTime.HasValue)
-        {
-            duration = _expirationTime.Value - DateTimeOffset.Now;
-        }
 
         _notificationId = Task.Run(async () =>
             await _dBusInstance.NotifyAsync(
@@ -62,8 +56,12 @@ internal class DBusNotification(NotificationManagerConfig _config, IDbusNotifica
         IsAlive = true;
 
         _actionManager.AddSession(NotificationId, this);
+        if (duration.HasValue)
+        {
+            _expirationTime = DateTimeOffset.Now.Add(duration.Value);
+        }
         _expirationHelper ??= new ExpirationHelper(this);
-        _expirationHelper.SetNoficifationDuration(config);
+        _expirationHelper.SetNoficifationDuration(duration);
     }
 
     public void Show(NotificationConfig? config = null)

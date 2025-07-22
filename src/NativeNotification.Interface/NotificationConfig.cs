@@ -5,7 +5,7 @@ public class NotificationConfig
     /// <summary>
     /// If both ExpirationTime and Duration are configured, the option that triggers earlier will take effect.
     /// </summary>
-    public DateTime? ExpirationTime { get; set; } = null;
+    public DateTimeOffset? ExpirationTime { get; set; } = null;
 
     /// <summary>
     /// If both ExpirationTime and Duration are configured, the option that triggers earlier will take effect.

@@ -8,6 +8,7 @@ namespace NativeNotification.Linux;
 [SupportedOSPlatform("linux")]
 internal sealed class DBusNotificationManager : INotificationManager, IDisposable
 {
+    private bool _disposed = false;
     private readonly IDbusNotifications _dBusInstance;
     private readonly ActionManager<uint> _actionManager = new();
     private readonly List<IDisposable> _disposables = [];
@@ -27,23 +28,31 @@ internal sealed class DBusNotificationManager : INotificationManager, IDisposabl
 
     public void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
         _disposables.ForEach(disposable => disposable.Dispose());
         _actionManager.RemoveAll();
         GC.SuppressFinalize(this);
+        _disposed = true;
     }
 
     public INotification Create()
     {
+        ObjectDisposedException.ThrowIf(_disposed, nameof(DBusNotificationManager));
         return new DBusNotification(_config, _dBusInstance, _actionManager);
     }
 
     public IProgressNotification CreateProgress()
     {
+        ObjectDisposedException.ThrowIf(_disposed, nameof(DBusNotificationManager));
         throw new NotImplementedException();
     }
 
     public void RomoveAllNotifications()
     {
+        ObjectDisposedException.ThrowIf(_disposed, nameof(DBusNotificationManager));
         _actionManager.RemoveAll();
     }
 
