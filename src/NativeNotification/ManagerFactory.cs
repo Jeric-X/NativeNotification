@@ -9,7 +9,7 @@ namespace NativeNotification;
 
 public class ManagerFactory
 {
-    public static INotificationManager GetNotificationManager(ManagerConfig? config = default)
+    public static INotificationManager GetNotificationManager(NotificationManagerConfig? config = default)
     {
 #if WINDOWS
         if (OperatingSystem.IsWindows())

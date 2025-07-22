@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace NativeNotification;
 
-namespace NativeNotification;
-
-public class ManagerConfig
+public class NotificationManagerConfig
 {
     /// <summary>
     /// Only used on Linux.

@@ -3,10 +3,8 @@ using NativeNotification.Interface;
 
 namespace NativeNotification.Linux;
 
-internal class DBusNotification(ManagerConfig _config, IDbusNotifications _dBusInstance, ActionManager<uint> _actionManager) : INotification, INotificationInternal
+internal class DBusNotification(NotificationManagerConfig _config, IDbusNotifications _dBusInstance, ActionManager<uint> _actionManager) : INotification, INotificationInternal
 {
-    private static readonly string AppIcon = string.Empty;// new Uri(Path.Combine(Env.ProgramDirectory, "Assets", "icon.svg")).AbsoluteUri;
-
     public string? Title { get; set; }
     public string? Message { get; set; }
     public Uri? Image { get; set; }
@@ -14,6 +12,7 @@ internal class DBusNotification(ManagerConfig _config, IDbusNotifications _dBusI
     public bool IsAlive { get; set; } = false;
     public void SetIsAlive(bool IsAlive) => this.IsAlive = IsAlive;
 
+    private ExpirationHelper? _expirationHelper;
     private uint? _notificationId;
     private uint NotificationId => _notificationId ?? 0;
     private DateTimeOffset? _expirationTime;
@@ -63,6 +62,8 @@ internal class DBusNotification(ManagerConfig _config, IDbusNotifications _dBusI
         IsAlive = true;
 
         _actionManager.AddSession(NotificationId, this);
+        _expirationHelper ??= new ExpirationHelper(this);
+        _expirationHelper.SetNoficifationDuration(config);
     }
 
     public void Show(NotificationConfig? config = null)

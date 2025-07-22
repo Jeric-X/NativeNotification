@@ -11,9 +11,9 @@ internal sealed class DBusNotificationManager : INotificationManager, IDisposabl
     private readonly IDbusNotifications _dBusInstance;
     private readonly ActionManager<uint> _actionManager = new();
     private readonly List<IDisposable> _disposables = [];
-    private readonly ManagerConfig _config;
+    private readonly NotificationManagerConfig _config;
 
-    public DBusNotificationManager(ManagerConfig? config = default)
+    public DBusNotificationManager(NotificationManagerConfig? config = default)
     {
         var connection = Connection.Session;
         _dBusInstance = connection.CreateProxy<IDbusNotifications>("org.freedesktop.Notifications", "/org/freedesktop/Notifications");
@@ -22,7 +22,7 @@ internal sealed class DBusNotificationManager : INotificationManager, IDisposabl
             _disposables.Add(await _dBusInstance.WatchActionInvokedAsync(input => _actionManager.OnActivated(input.id, input.actionKey)));
             _disposables.Add(await _dBusInstance.WatchNotificationClosedAsync(input => _actionManager.OnClosed(input.id)));
         }).Wait();
-        _config = config ?? new ManagerConfig();
+        _config = config ?? new NotificationManagerConfig();
     }
 
     public void Dispose()
