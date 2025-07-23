@@ -1,38 +1,72 @@
 ﻿#if MACOS
 
-using CoreBluetooth;
 using NativeNotification.Common;
 using NativeNotification.Interface;
 
 namespace NativeNotification.MacOS;
 
-internal class NSNotification(NSNotificationManager _manager) : INotification, INotificationInternal
+internal class NSNotification : INotification, INotificationInternal
 {
     public string? Title { get; set; }
     public string? Message { get; set; }
-    public Uri? Image { get; set; }
+    private NSImage? _nsImage;
+    private Uri? _imageUri;
+    public Uri? Image
+    {
+        get
+        {
+            return _imageUri;
+        }
+        set
+        {
+            _imageUri = value;
+            _nsImage = new NSImage(value!);
+        }
+    }
     public List<ActionButton> Buttons { get; set; } = [];
     public Action? ContentAction { get; set; }
 
-    private bool isAlive = false;
+    private bool _isAlive = false;
     public bool IsAlive
     {
         get
         {
-            if (isAlive is false)
+            if (_isAlive is false)
             {
                 return false;
             }
-            isAlive = _manager.GetAllNotifications().Any(x => x.NotificationId == NotificationId);
-            return isAlive;
+            _isAlive = _manager.GetAllNotifications().Any(x => x.NotificationId == NotificationId);
+            return _isAlive;
         }
-        set => isAlive = value;
+        set => _isAlive = value;
     }
     public void SetIsAlive(bool IsAlive) => this.IsAlive = IsAlive;
 
     private ExpirationHelper? _expirationHelper;
+    private readonly NSNotificationManager _manager;
+
+    public NSNotification(NSNotificationManager manager)
+    {
+        _manager = manager;
+    }
+
+    public NSNotification(NSNotificationManager manager, NSUserNotification notification)
+    {
+        _manager = manager;
+        Title = notification.Title;
+        Message = notification.InformativeText;
+        _nsImage = notification.ContentImage;
+        Buttons = notification.AdditionalActions?
+            .Where(x => x.Identifier is not null && x.Title is not null)
+            .Select(x => new ActionButton(x.Title!, x.Identifier!)).ToList() ?? [];
+        ContentAction = null;
+        IsAlive = true;
+        IsCreatedByCurrentProcess = false;
+    }
 
     public string NotificationId { get; } = GetGuid();
+
+    public bool IsCreatedByCurrentProcess { get; private init; } = true;
 
     private static string GetGuid()
     {
@@ -55,12 +89,8 @@ internal class NSNotification(NSNotificationManager _manager) : INotification, I
             SoundName = config?.Silent is true ? null : NSUserNotification.NSUserNotificationDefaultSoundName,
             AdditionalActions = [.. actionList],
             HasActionButton = false,
+            ContentImage = _nsImage
         };
-
-        if (Image is not null)
-        {
-            notification.ContentImage = new NSImage(Image!);
-        }
 
         _manager.AddHistory(NotificationId, this);
         _manager.Center.DeliverNotification(notification);

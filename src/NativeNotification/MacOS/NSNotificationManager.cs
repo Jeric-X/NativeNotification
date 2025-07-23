@@ -8,7 +8,6 @@ namespace NativeNotification.MacOS;
 internal class NSNotificationManager : NotificationManagerBase, INotificationManager
 {
     public NSUserNotificationCenter Center { get; }
-    private readonly SessionHistory _actionManager = new();
     private bool _isAppLaunchedByNotification = false;
     public override bool IsAppLaunchedByNotification => _isAppLaunchedByNotification;
     private NSObject? _didFinishLaunchingObserver = null;
@@ -20,8 +19,18 @@ internal class NSNotificationManager : NotificationManagerBase, INotificationMan
         _config = config ?? new NativeNotificationOption();
         Center = NSUserNotificationCenter.DefaultUserNotificationCenter;
         ArgumentNullException.ThrowIfNull(Center, nameof(Center));
+
         _didFinishLaunchingObserver = NSApplication.Notifications.ObserveDidFinishLaunching((sender, arg) =>
         {
+            foreach (var deliveredNativeNotification in Center.DeliveredNotifications)
+            {
+                if (deliveredNativeNotification.Identifier is not null)
+                {
+                    var notification = new NSNotification(this, deliveredNativeNotification);
+                    SessionHistory.AddSession(notification.NotificationId, notification);
+                }
+            }
+        
             var nsUserNotification = arg.Notification?.UserInfo?[NSApplication.LaunchUserNotificationKey] as NSUserNotification;
             _isAppLaunchedByNotification = arg.IsLaunchFromUserNotification && nsUserNotification is not null;
             if (nsUserNotification is not null)
@@ -54,7 +63,7 @@ internal class NSNotificationManager : NotificationManagerBase, INotificationMan
     public override void RomoveAllNotifications()
     {
         Center.RemoveAllDeliveredNotifications();
-        _actionManager.Reset();
+        SessionHistory.Reset();
     }
 
     public override IEnumerable<INotificationInternal> GetAllNotifications()

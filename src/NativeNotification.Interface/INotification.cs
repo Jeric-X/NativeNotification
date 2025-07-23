@@ -14,6 +14,12 @@ public interface INotification
     public string NotificationId { get; }
 
     public bool IsAlive { get; }
+
+    /// <summary>
+    /// <c>IsCreatedByCurrentProcess</c> indicates whether the notification was created by the current process.
+    /// If value is <c>false</c>, it is recommended to reconfigure this <c>INotification</c> before calling <c>Update</c> or <c>Show</c>.
+    /// </summary>
+    public bool IsCreatedByCurrentProcess { get; }
     public void Show(NotificationDeliverOption? config = null);
 
     /// <summary>

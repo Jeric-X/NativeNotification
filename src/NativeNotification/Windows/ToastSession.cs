@@ -19,7 +19,7 @@ namespace NativeNotification.Windows
         private ExpirationHelper? _expirationHelper;
         private readonly string _group = "DEFAULT_GROUP";
         private readonly string _tag = Guid.NewGuid().ToString();
-        internal bool CreatedByToast { get; } = false;
+        public bool IsCreatedByCurrentProcess { get; private init; } = true;
         private readonly WindowsNotificationManager _manager;
 
         private string? Text1 => Message;
@@ -46,7 +46,8 @@ namespace NativeNotification.Windows
             Text2 = dataMap[TOAST_BINDING_TEXT2];
             toast.Activated += Toast_Activated;
             toast.Dismissed += Toast_Dismissed;
-            CreatedByToast = true;
+            IsCreatedByCurrentProcess = false;
+            IsAlive = true;
         }
 
         protected virtual ToastContentBuilder GetBuilder()

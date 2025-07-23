@@ -67,7 +67,7 @@ public partial class WindowsNotificationManager : NotificationManagerBase
     {
         if (_isAppLaunchedByNotification && _lauchEventTrigged is false)
         {
-            if (notification is ToastSession toastSession && toastSession.CreatedByToast)
+            if (notification is ToastSession toastSession && toastSession.IsCreatedByCurrentProcess is false)
             {
                 _lauchEventTrigged = true;
                 base.ActivateNotification(notificationId, actionId, notification, true);

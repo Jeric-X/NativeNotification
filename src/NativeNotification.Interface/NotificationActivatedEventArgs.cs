@@ -1,6 +1,4 @@
-﻿using System.Runtime.Versioning;
-
-namespace NativeNotification.Interface;
+﻿namespace NativeNotification.Interface;
 
 public class NotificationActivatedEventArgs(string notificationId)
 {
@@ -11,7 +9,6 @@ public class NotificationActivatedEventArgs(string notificationId)
 
     /// <summary>
     /// <c>true</c> if the program is launched by clicking the notification.
-    /// On Linux, this is always <c>false</c>.
     /// </summary>
     public bool IsLaunchedActivation { get; init; } = false;
 }

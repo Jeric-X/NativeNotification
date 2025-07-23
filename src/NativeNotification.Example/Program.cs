@@ -8,13 +8,13 @@ internal class Program
     static void Main(string[] _)
     {
 #if DEBUG
-        //bool ok = false;
-        System.Diagnostics.Debugger.Launch();
-        //while (!ok)
-        //{
-        //    System.Diagnostics.Debugger.Break();
-        //    Thread.Sleep(1000);
-        //}
+        // bool ok = false;
+        // System.Diagnostics.Debugger.Launch();
+        // while (!ok)
+        // {
+        //     System.Diagnostics.Debugger.Break();
+        //     Thread.Sleep(1000);
+        // }
 #endif
 #if MACOS
         NSApplication.Init();

@@ -14,6 +14,7 @@ internal class DBusNotification(NativeNotificationOption _config, DBusNotificati
     public bool IsAlive { get; set; } = false;
     public void SetIsAlive(bool IsAlive) => this.IsAlive = IsAlive;
 
+    public bool IsCreatedByCurrentProcess { get; } = true;
     private ExpirationHelper? _expirationHelper;
     private uint? _notificationId;
     public uint InternalNotificationId => _notificationId ?? 0;
