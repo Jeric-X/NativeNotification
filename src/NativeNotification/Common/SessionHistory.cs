@@ -31,11 +31,14 @@ public class SessionHistory<IdType> where IdType : notnull
 
     public void AddSession(IdType id, INotificationInternal<IdType> session)
     {
-        _handlerList.TryAdd(id, []);
-        var buttonList = _handlerList[id];
-        foreach (var button in session.Buttons)
+        if (session.Buttons.Count != 0)
         {
-            buttonList.TryAdd(button.ActionId.ToString(), button);
+            _handlerList.TryAdd(id, []);
+            var buttonList = _handlerList[id];
+            foreach (var button in session.Buttons)
+            {
+                buttonList.TryAdd(button.ActionId.ToString(), button);
+            }
         }
         _sessionList.TryAdd(id, session);
     }

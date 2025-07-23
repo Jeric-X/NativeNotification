@@ -20,9 +20,11 @@ public abstract class NotificationManagerBase<TNotificationId>
         }
     }
 
+    public virtual bool IsApplicationStartedByNotificationAction => false;
+    public virtual string? LaunchActionId { get; } = null;
+
     public abstract INotification Create();
-    public abstract IProgressNotification CreateProgress();
-    public abstract void Dispose();
+    public virtual IProgressNotification CreateProgress() => throw new NotSupportedException("Progress notifications are not supported on current platform.");
     public abstract void RomoveAllNotifications();
 
     public void RemoveHistory(TNotificationId notificationId)
@@ -41,6 +43,11 @@ public abstract class NotificationManagerBase<TNotificationId>
         action?.Invoke();
         ActionActived?.Invoke(actionId);
         SessionHistory.Remove(notificationId);
+    }
+
+    public void ActivateAction(string actionId)
+    {
+        ActionActived?.Invoke(actionId);
     }
 
     public virtual IEnumerable<INotification> GetAllNotifications()

@@ -1,5 +1,4 @@
 ﻿using NativeNotification.Interface;
-using System;
 
 namespace NativeNotification.Example;
 
@@ -8,6 +7,15 @@ internal class Program
     static INotificationManager Manager { get; } = ManagerFactory.GetNotificationManager();
     static void Main(string[] _)
     {
+#if DEBUG
+        // bool ok = false;
+        // System.Diagnostics.Debugger.Launch();
+        // while (!ok)
+        // {
+        //     System.Diagnostics.Debugger.Break();
+        //     Thread.Sleep(1000);
+        // }
+#endif
 #if MACOS
         NSApplication.Init();
         Task.Run(ShowSamples);
@@ -19,10 +27,15 @@ internal class Program
 
     static void ShowSamples()
     {
+        Manager.ActionActived += (actionId) =>
+        {
+            Console.WriteLine($"Action id '{actionId}' actived.");
+            File.WriteAllText("/Users/jericx/sw/a.txt", actionId);
+        };
         Console.WriteLine("c: clear all notifications");
         Console.WriteLine("q: quit");
         Console.WriteLine("1: Show a 10 seconds duration notification, with contents update.");
-        Console.WriteLine("2: Show a notification, no sound, with image and buttons.");
+        Console.WriteLine("2: Show a notification, no sound, with image and buttons, no sound.");
         Console.WriteLine("3: Show a notification with progress bar and button.");
         Dictionary<string, Action> actions = new()
         {
@@ -38,7 +51,10 @@ internal class Program
             input = input.Trim();
             if (input == "q")
             {
-                Manager.Dispose();
+                if (Manager is IDisposable disposableManager)
+                {
+                    disposableManager.Dispose();
+                }
                 Environment.Exit(0);
             }
             if (actions.TryGetValue(input, out var action))
@@ -57,14 +73,19 @@ internal class Program
         var notification = Manager.Create();
         notification.Title = "Title";
         notification.Message = "This is a test notification, will be closed in 10 seconds.";
-        notification.Show(new NotificationDeliverOption() { Duration = TimeSpan.FromSeconds(10) });
-        for (int i = 9; i >= 0; i--)
+        notification.Buttons.Add(new ActionButton("buttun text", () =>
         {
-            await Task.Delay(TimeSpan.FromSeconds(1));
+            Console.WriteLine("buttun clicked.");
+        }));
+        notification.Show(new NotificationDeliverOption() { Duration = TimeSpan.FromSeconds(10) });
+        for (int i = 8; i >= 0; i -= 2)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(2));
             notification.Message = $"This is a test notification, will be closed in {i} seconds.";
             if (!notification.Update())
             {
                 Console.WriteLine("Update failed.");
+                break;
             }
         }
     }
@@ -79,14 +100,11 @@ internal class Program
         imagePath = Path.Combine("Contents/Resources", imagePath);
 #endif
         notification.Image = new Uri(Path.GetFullPath(imagePath));
-        notification.Buttons = [
-            new ActionButton("Button1", () => {
-                Console.WriteLine("Button 1Clicked.");
-            }),
-            new ActionButton("Button2", () => {
-                Console.WriteLine("Button2 Clicked.");
-            }),
-        ];
+        for (int i = 0; i < 10; i++)
+        {
+            int idx = i;
+            notification.Buttons.Add(new ActionButton($"Button {idx + 1}", $"button id {idx + 1}"));
+        }
         notification.Show(new NotificationDeliverOption() { Silent = true });
     }
 

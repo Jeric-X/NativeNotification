@@ -25,7 +25,7 @@ internal sealed class DBusNotificationManager : NotificationManagerBase<uint>, I
         _disposables.Add(watchClosedTask.Result);
     }
 
-    public override void Dispose()
+    public void Dispose()
     {
         if (_disposed)
         {

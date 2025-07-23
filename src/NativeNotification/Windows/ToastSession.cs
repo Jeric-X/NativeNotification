@@ -96,9 +96,9 @@ namespace NativeNotification.Windows
             {
                 builder.AddAudio(null, null, true);
             }
+            _manager.AddHistory(_tag, this);
             _manager.Center.Show(GetToast(builder));
             IsAlive = true;
-            _manager.AddHistory(_tag, this);
             _expirationHelper ??= new ExpirationHelper(this);
             _expirationHelper.SetNoficifationDuration(config);
         }

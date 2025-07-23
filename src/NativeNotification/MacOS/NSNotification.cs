@@ -53,8 +53,7 @@ internal class NSNotification(NSNotificationManager _manager) : INotification, I
             InformativeText = Message,
             SoundName = config?.Silent is true ? null : NSUserNotification.NSUserNotificationDefaultSoundName,
             AdditionalActions = [.. actionList],
-            HasActionButton = true,
-            ActionButtonTitle = "Action"
+            HasActionButton = false,
         };
 
         if (Image is not null)
@@ -62,8 +61,8 @@ internal class NSNotification(NSNotificationManager _manager) : INotification, I
             notification.ContentImage = new NSImage(Image!);
         }
 
-        _manager.Center.DeliverNotification(notification);
         _manager.AddHistory(NotificationId, this);
+        _manager.Center.DeliverNotification(notification);
     }
 
     public void Show(NotificationDeliverOption? config = null)
