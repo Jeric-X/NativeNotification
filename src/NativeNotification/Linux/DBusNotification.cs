@@ -1,9 +1,11 @@
 ﻿using NativeNotification.Common;
 using NativeNotification.Interface;
+using System.Runtime.Versioning;
 
 namespace NativeNotification.Linux;
 
-internal class DBusNotification(NotificationManagerConfig _config, IDbusNotifications _dBusInstance, ActionManager<uint> _actionManager) : INotification, INotificationInternal
+[SupportedOSPlatform("linux")]
+internal class DBusNotification(NativeNotificationOption _config, DBusNotificationManager _manager) : INotification, INotificationInternal<uint>
 {
     public string? Title { get; set; }
     public string? Message { get; set; }
@@ -14,15 +16,15 @@ internal class DBusNotification(NotificationManagerConfig _config, IDbusNotifica
 
     private ExpirationHelper? _expirationHelper;
     private uint? _notificationId;
-    private uint NotificationId => _notificationId ?? 0;
+    public uint NotificationId => _notificationId ?? 0;
     private DateTimeOffset? _expirationTime;
 
-    protected void NativeShow(NotificationConfig? config = null)
+    protected void NativeShow(NotificationDeliverOption? config = null)
     {
         List<string> actionList = [];
         foreach (var button in Buttons)
         {
-            actionList.Add(button.Uid.ToString());
+            actionList.Add(button.ActionId.ToString());
             actionList.Add(button.Text);
         }
 
@@ -37,15 +39,20 @@ internal class DBusNotification(NotificationManagerConfig _config, IDbusNotifica
             hintDictionary.Add("suppress-sound", true);
         }
 
-        config ??= new NotificationConfig();
-        config.ExpirationTime ??= _expirationTime;
+        if (config is null && _expirationTime is not null)
+        {
+            config = new NotificationDeliverOption
+            {
+                ExpirationTime = _expirationTime
+            };
+        }
         var duration = ExpirationHelper.GetExpirationDuration(config);
 
         _notificationId = Task.Run(async () =>
-            await _dBusInstance.NotifyAsync(
-                _config.AppName,
+            await _manager.DBus.NotifyAsync(
+                _config.AppName ?? string.Empty,
                 NotificationId,
-                _config.AppIcon,
+                _config.AppIcon ?? string.Empty,
                 Title ?? string.Empty,
                 Message ?? string.Empty,
                 [.. actionList],
@@ -55,18 +62,18 @@ internal class DBusNotification(NotificationManagerConfig _config, IDbusNotifica
         ).Result;
         IsAlive = true;
 
-        _actionManager.AddSession(NotificationId, this);
+        _manager.AddHistory(NotificationId, this);
         if (duration.HasValue)
         {
             _expirationTime = DateTimeOffset.Now.Add(duration.Value);
         }
-        _expirationHelper ??= new ExpirationHelper(this);
-        _expirationHelper.SetNoficifationDuration(duration);
     }
 
-    public void Show(NotificationConfig? config = null)
+    public void Show(NotificationDeliverOption? config = null)
     {
-        NativeShow(config);
+        NativeShow(config ?? new());
+        _expirationHelper ??= new ExpirationHelper(this);
+        _expirationHelper.SetNoficifationDuration(config);
     }
 
     public bool Update()
@@ -81,6 +88,6 @@ internal class DBusNotification(NotificationManagerConfig _config, IDbusNotifica
 
     public void Remove()
     {
-        _dBusInstance.CloseNotificationAsync(NotificationId);
+        _manager.DBus.CloseNotificationAsync(NotificationId);
     }
 }

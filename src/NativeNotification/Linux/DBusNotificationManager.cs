@@ -6,55 +6,53 @@ using Tmds.DBus;
 namespace NativeNotification.Linux;
 
 [SupportedOSPlatform("linux")]
-internal sealed class DBusNotificationManager : INotificationManager, IDisposable
+internal sealed class DBusNotificationManager : NotificationManagerBase<uint>, IDisposable
 {
     private bool _disposed = false;
-    private readonly IDbusNotifications _dBusInstance;
-    private readonly ActionManager<uint> _actionManager = new();
-    private readonly List<IDisposable> _disposables = [];
-    private readonly NotificationManagerConfig _config;
+    public IDbusNotifications DBus { get; }
 
-    public DBusNotificationManager(NotificationManagerConfig? config = default)
+    private readonly List<IDisposable> _disposables = [];
+    private readonly NativeNotificationOption _config;
+
+    public DBusNotificationManager(NativeNotificationOption? config = default)
     {
-        var connection = Connection.Session;
-        _dBusInstance = connection.CreateProxy<IDbusNotifications>("org.freedesktop.Notifications", "/org/freedesktop/Notifications");
-        Task.Run(async () =>
-        {
-            _disposables.Add(await _dBusInstance.WatchActionInvokedAsync(input => _actionManager.OnActivated(input.id, input.actionKey)));
-            _disposables.Add(await _dBusInstance.WatchNotificationClosedAsync(input => _actionManager.OnClosed(input.id)));
-        }).Wait();
-        _config = config ?? new NotificationManagerConfig();
+        _config = config ?? new NativeNotificationOption();
+
+        DBus = Connection.Session.CreateProxy<IDbusNotifications>("org.freedesktop.Notifications", "/org/freedesktop/Notifications");
+        var watchInvokeTask = DBus.WatchActionInvokedAsync(input => ActivateAction(input.id, input.actionKey));
+        var watchClosedTask = DBus.WatchNotificationClosedAsync(input => RemoveHistory(input.id));
+        _disposables.Add(watchInvokeTask.Result);
+        _disposables.Add(watchClosedTask.Result);
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         if (_disposed)
         {
             return;
         }
+        RomoveAllNotifications();
         _disposables.ForEach(disposable => disposable.Dispose());
-        _actionManager.RemoveAll();
         GC.SuppressFinalize(this);
         _disposed = true;
     }
 
-    public INotification Create()
+    public override INotification Create()
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(DBusNotificationManager));
-        return new DBusNotification(_config, _dBusInstance, _actionManager);
+        return new DBusNotification(_config, this);
     }
 
-    public IProgressNotification CreateProgress()
+    public override IProgressNotification CreateProgress()
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(DBusNotificationManager));
         throw new NotImplementedException();
     }
 
-    public void RomoveAllNotifications()
+    public override void RomoveAllNotifications()
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(DBusNotificationManager));
-        _actionManager.RemoveAll();
+        SessionHistory.RemoveAll();
     }
-
     ~DBusNotificationManager() => Dispose();
 }

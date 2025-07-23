@@ -10,7 +10,7 @@ namespace NativeNotification.Windows
             this ToastContentBuilder content, ActionButton button)
         {
             return content.AddButton(
-                new ToastButton(button.Text, button.Uid)
+                new ToastButton(button.Text, button.ActionId)
                 {
                     ActivationType = ToastActivationType.Background
                 }

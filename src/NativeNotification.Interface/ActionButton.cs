@@ -1,13 +1,34 @@
 namespace NativeNotification.Interface;
 
-public class ActionButton(string text, Action action)
+public class ActionButton
 {
-    public string Text { get; set; } = text;
-    public string Uid { get; } = Guid.NewGuid().ToString();
-    public Action Callbacker { get; set; } = action;
+    public string Text { get; set; }
+    public string ActionId { get; }
+    public Action? Callback { get; set; }
 
-    public void Invoke()
+    public ActionButton(string text)
     {
-        Callbacker.Invoke();
+        Text = text;
+        ActionId = Guid.NewGuid().ToString();
+    }
+
+    public ActionButton(string text, Action callback)
+    {
+        Text = text;
+        Callback = callback;
+        ActionId = Guid.NewGuid().ToString();
+    }
+
+    public ActionButton(string text, Action callback, string actionId)
+    {
+        Text = text;
+        Callback = callback;
+        ActionId = actionId;
+    }
+
+    public ActionButton(string text, string actionId)
+    {
+        Text = text;
+        ActionId = actionId;
     }
 }

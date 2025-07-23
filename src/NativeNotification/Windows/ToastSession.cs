@@ -7,8 +7,8 @@ using Windows.UI.Notifications;
 
 namespace NativeNotification.Windows
 {
-    public class ToastSession(ToastNotifier _notifier, ActionManager<string> _actionManager)
-        : INotification, INotificationInternal
+    public class ToastSession(WindowsNotificationManager _manager)
+        : INotification, INotificationInternal<string>
     {
         public string? Title { get; set; }
         public string? Message { get; set; }
@@ -16,11 +16,10 @@ namespace NativeNotification.Windows
         public List<ActionButton> Buttons { get; set; } = [];
         public bool IsAlive { get; set; } = false;
         public void SetIsAlive(bool IsAlive) => this.IsAlive = IsAlive;
-
+        public string NotificationId => _tag;
         private ExpirationHelper? _expirationHelper;
         private const string Group = "DEFAULT_GROUP";
         private readonly string _tag = Guid.NewGuid().ToString();
-        private string Tag => _tag.Length <= 64 ? _tag : _tag[..63];
         private string? Text1 => Message;
         private string? Text2 { get; set; }
 
@@ -49,7 +48,7 @@ namespace NativeNotification.Windows
         {
             var toast = new ToastNotification(builder.GetToastContent().GetXml())
             {
-                Tag = Tag,
+                Tag = _tag,
                 Group = Group,
                 Data = new NotificationData()
             };
@@ -74,11 +73,11 @@ namespace NativeNotification.Windows
                 return;
             if (args.Arguments.Length != 0)
             {
-                _actionManager.OnActivated(Tag, args.Arguments);
+                _manager.ActivateAction(_tag, args.Arguments);
             }
             else
             {
-                _actionManager.OnClosed(Tag);
+                _manager.RemoveHistory(_tag);
             }
         }
 
@@ -86,32 +85,33 @@ namespace NativeNotification.Windows
         {
             if (args.Reason is ToastDismissalReason.UserCanceled)
             {
-                _actionManager.OnClosed(Tag);
+                _manager.RemoveHistory(_tag);
             }
         }
 
-        public void Show(NotificationConfig? config = null)
+        public void Show(NotificationDeliverOption? config = null)
         {
             var builder = GetBuilder();
             if (config?.Silent is true)
             {
                 builder.AddAudio(null, null, true);
             }
-            _notifier.Show(GetToast(builder));
-            _actionManager.AddSession(Tag, this);
+            _manager.Center.Show(GetToast(builder));
+            IsAlive = true;
+            _manager.AddHistory(_tag, this);
             _expirationHelper ??= new ExpirationHelper(this);
             _expirationHelper.SetNoficifationDuration(config);
         }
 
         public bool Update()
         {
-            return _notifier.Update(SetBingData(), Tag, Group) is NotificationUpdateResult.Succeeded;
+            return _manager.Center.Update(SetBingData(), _tag, Group) is NotificationUpdateResult.Succeeded;
         }
 
         public void Remove()
         {
-            ToastNotificationManagerCompat.History.Remove(Tag, Group);
-            _actionManager.OnClosed(Tag);
+            ToastNotificationManagerCompat.History.Remove(_tag, Group);
+            _manager.RemoveHistory(_tag);
         }
     }
 }

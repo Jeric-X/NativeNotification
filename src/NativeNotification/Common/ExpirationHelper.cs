@@ -4,7 +4,7 @@ namespace NativeNotification.Common;
 
 public class ExpirationHelper(INotification session)
 {
-    public static TimeSpan? GetExpirationDuration(NotificationConfig? config)
+    public static TimeSpan? GetExpirationDuration(NotificationDeliverOption? config)
     {
         TimeSpan? timeSpan = null;
         if (config?.ExpirationTime is not null)
@@ -41,7 +41,7 @@ public class ExpirationHelper(INotification session)
         return cts.Token;
     }
 
-    public async void SetNoficifationDuration(NotificationConfig? config = null)
+    public async void SetNoficifationDuration(NotificationDeliverOption? config = null)
     {
         var duration = GetExpirationDuration(config);
         var token = CreateNewDurationCtk();

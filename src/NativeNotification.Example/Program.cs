@@ -1,4 +1,5 @@
 ﻿using NativeNotification.Interface;
+using System;
 
 namespace NativeNotification.Example;
 
@@ -9,61 +10,70 @@ internal class Program
     {
 #if MACOS
         NSApplication.Init();
+        Task.Run(ShowSamples);
+        NSApplication.SharedApplication.Run();
+#else
+        ShowSamples();
 #endif
+    }
+
+    static void ShowSamples()
+    {
         Console.WriteLine("c: clear all notifications");
-        Console.WriteLine("0: exit");
-        Console.WriteLine("1: Show a 5 seconds duration notification, with contents changing.");
+        Console.WriteLine("q: quit");
+        Console.WriteLine("1: Show a 10 seconds duration notification, with contents update.");
         Console.WriteLine("2: Show a notification, no sound, with image and buttons.");
         Console.WriteLine("3: Show a notification with progress bar and button.");
-        Console.WriteLine("4: Show a notification update it self.");
         Dictionary<string, Action> actions = new()
         {
             ["c"] = Manager.RomoveAllNotifications,
             ["1"] = DeliverText,
             ["2"] = DeliverImage,
             ["3"] = DeliverProgressBar,
-            ["4"] = DeliverUpdate,
         };
-        Task.Run(() =>
+        while (true)
         {
-            while (true)
+            Console.Write("Input: ");
+            string input = Console.ReadLine() ?? string.Empty;
+            input = input.Trim();
+            if (input == "q")
             {
-                Console.Write("Input: ");
-                string input = Console.ReadLine() ?? string.Empty;
-                input = input.Trim();
-                if (input == "0")
-                {
-                    Manager.Dispose();
-                    Environment.Exit(0);
-                }
-                if (actions.TryGetValue(input, out var action))
-                {
-                    action();
-                }
-                else
-                {
-                    Console.WriteLine("Invalid input, please try again.");
-                }
+                Manager.Dispose();
+                Environment.Exit(0);
             }
-        });
-#if MACOS
-        NSApplication.SharedApplication.Run();
-#endif
+            if (actions.TryGetValue(input, out var action))
+            {
+                action();
+            }
+            else
+            {
+                Console.WriteLine("Invalid input, please try again.");
+            }
+        }
     }
 
-    static void DeliverText()
+    static async void DeliverText()
     {
         var notification = Manager.Create();
         notification.Title = "Title";
-        notification.Message = "This is a test notification, will be closed in 2 seconds.";
-        notification.Show(new NotificationConfig() { Duration = TimeSpan.FromSeconds(2) });
+        notification.Message = "This is a test notification, will be closed in 10 seconds.";
+        notification.Show(new NotificationDeliverOption() { Duration = TimeSpan.FromSeconds(10) });
+        for (int i = 9; i >= 0; i--)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(1));
+            notification.Message = $"This is a test notification, will be closed in {i} seconds.";
+            if (!notification.Update())
+            {
+                Console.WriteLine("Update failed.");
+            }
+        }
     }
 
     static void DeliverImage()
     {
         var notification = Manager.Create();
         notification.Title = "Title";
-        notification.Message = "This is a test notification with image.";
+        notification.Message = "This is a test notification with image and buttons.";
         var imagePath = Path.Combine("Assets", "house.jpg");
 #if MACOS
         imagePath = Path.Combine("Contents/Resources", imagePath);
@@ -77,7 +87,7 @@ internal class Program
                 Console.WriteLine("Button2 Clicked.");
             }),
         ];
-        notification.Show(new NotificationConfig() { Silent = true });
+        notification.Show(new NotificationDeliverOption() { Silent = true });
     }
 
     static void DeliverProgressBar()
@@ -117,29 +127,6 @@ internal class Program
                 await Task.Delay(TimeSpan.FromSeconds(0.5), cts.Token);
             }
             notification.ProgressValueTip = "Complete.";
-            notification.Update();
-        });
-    }
-
-    static void DeliverUpdate()
-    {
-        var notification = Manager.Create();
-        notification.Title = "Update Notification";
-        notification.Message = "This notification will update itself.";
-        notification.Show();
-
-        Task.Run(async () =>
-        {
-            for (int i = 0; i < 10; i++)
-            {
-                await Task.Delay(1000);
-                notification.Message = $"Updated message {i + 1}";
-                if (!notification.Update())
-                {
-                    Console.WriteLine("Notification is no longer alive, cannot update.");
-                    return;
-                }
-            }
             notification.Update();
         });
     }

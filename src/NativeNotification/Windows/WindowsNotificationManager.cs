@@ -9,34 +9,33 @@ using Windows.UI.Notifications;
 
 namespace NativeNotification.Windows;
 
-public partial class WindowsNotificationManager : INotificationManager, IDisposable
+public partial class WindowsNotificationManager : NotificationManagerBase<string>, IDisposable
 {
     private bool _disposed = false;
-    private readonly ActionManager<string> _actionManager = new();
-    private readonly ToastNotifier Notifer;
-    public WindowsNotificationManager()
+    public readonly ToastNotifier Center;
+    public WindowsNotificationManager(NativeNotificationOption? config = default)
     {
-        Notifer = ToastNotificationManager.CreateToastNotifier(RegistFromCurrentProcess());
+        Center = ToastNotificationManager.CreateToastNotifier(RegistFromCurrentProcess(config?.AppName));
         // 向系统注册通知按钮回调，如果不注册，系统会打开新的进程；真正的回调在ToastSession中
         ToastNotificationManagerCompat.OnActivated += (args) => { };
     }
 
-    public INotification Create()
+    public override INotification Create()
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(WindowsNotificationManager));
-        return new ToastSession(Notifer, _actionManager);
+        return new ToastSession(this);
     }
 
-    public IProgressNotification CreateProgress()
+    public override IProgressNotification CreateProgress()
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(WindowsNotificationManager));
-        return new ProgressSession(Notifer, _actionManager);
+        return new ProgressSession(this);
     }
 
-    public void RomoveAllNotifications()
+    public override void RomoveAllNotifications()
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(WindowsNotificationManager));
-        _actionManager.Reset();
+        SessionHistory.Reset();
         ToastNotificationManagerCompat.History.Clear();
     }
 
@@ -45,11 +44,11 @@ public partial class WindowsNotificationManager : INotificationManager, IDisposa
 
     public void UnRegistFromCurrentProcess()
     {
-        _actionManager.Reset();
+        SessionHistory.Reset();
         ToastNotificationManagerCompat.Uninstall();
     }
 
-    public static string RegistFromCurrentProcess(string? customName = null, string? appUserModelId = null)
+    public static string RegistFromCurrentProcess(string? customName = null)
     {
         var mainModule = Process.GetCurrentProcess().MainModule;
 
@@ -59,7 +58,7 @@ public partial class WindowsNotificationManager : INotificationManager, IDisposa
         }
 
         var appName = customName ?? Path.GetFileNameWithoutExtension(mainModule.FileName);
-        var aumid = (appUserModelId ?? appName) + "_" + new Guid().ToString();
+        var aumid = appName + "_" + new Guid().ToString();
 
         SetCurrentProcessExplicitAppUserModelID(aumid);
 
@@ -83,7 +82,7 @@ public partial class WindowsNotificationManager : INotificationManager, IDisposa
         Dispose();
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         if (_disposed)
         {

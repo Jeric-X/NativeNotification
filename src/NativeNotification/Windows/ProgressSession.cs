@@ -7,8 +7,8 @@ using Windows.UI.Notifications;
 
 namespace NativeNotification.Windows;
 
-public class ProgressSession(ToastNotifier notifer, ActionManager<string> callbackHandler)
-    : ToastSession(notifer, callbackHandler), IProgressNotification
+public class ProgressSession(WindowsNotificationManager manager)
+    : ToastSession(manager), IProgressNotification
 {
     public string? ProgressTitle { get; set; }
     public double? ProgressValue { get; set; }

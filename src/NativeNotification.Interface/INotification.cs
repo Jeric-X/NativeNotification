@@ -8,7 +8,7 @@ public interface INotification
     public List<ActionButton> Buttons { get; set; }
 
     public bool IsAlive { get; }
-    public void Show(NotificationConfig? config = null);
+    public void Show(NotificationDeliverOption? config = null);
 
     /// <summary>
     /// Image and Buttons are not updated on Windows.

@@ -1,6 +1,6 @@
 ﻿namespace NativeNotification.Interface;
 
-public class NotificationConfig
+public class NotificationDeliverOption
 {
     /// <summary>
     /// If both ExpirationTime and Duration are configured, the option that triggers earlier will take effect.

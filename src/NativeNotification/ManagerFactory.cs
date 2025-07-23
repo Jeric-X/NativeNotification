@@ -11,12 +11,12 @@ namespace NativeNotification;
 
 public class ManagerFactory
 {
-    public static INotificationManager GetNotificationManager(NotificationManagerConfig? config = default)
+    public static INotificationManager GetNotificationManager(NativeNotificationOption? option = default)
     {
 #if WINDOWS
         if (OperatingSystem.IsWindows())
         {
-            return new WindowsNotificationManager();
+            return new WindowsNotificationManager(option);
         }
 #endif
 #if MACOS
@@ -27,7 +27,7 @@ public class ManagerFactory
 #endif
         if (OperatingSystem.IsLinux())
         {
-            return new DBusNotificationManager(config);
+            return new DBusNotificationManager(option);
         }
 
         throw new NotSupportedException("Notification manager not supported on this platform.");

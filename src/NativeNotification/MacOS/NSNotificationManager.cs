@@ -2,65 +2,82 @@
 
 using NativeNotification.Common;
 using NativeNotification.Interface;
+using NativeNotification.Linux;
 
 namespace NativeNotification.MacOS;
 
-internal class NSNotificationManager : INotificationManager
+internal class NSNotificationManager : NotificationManagerBase<string>, INotificationManager
 {
     private bool _disposed = false;
-    private readonly NSUserNotificationCenter _nsNotificationCenter;
-    private readonly ActionManager<string> _actionManager = new();
+    public NSUserNotificationCenter Center { get; }
+    private readonly SessionHistory<string> _actionManager = new();
 
     public NSNotificationManager()
     {
-        _nsNotificationCenter = NSUserNotificationCenter.DefaultUserNotificationCenter;
-        // _nsNotificationCenter.Delegate = new NSUserNotificationCenterDelegateImpl();
-        ArgumentNullException.ThrowIfNull(_nsNotificationCenter, nameof(_nsNotificationCenter));
-        _nsNotificationCenter.DidActivateNotification += (sender, e) =>
+        Center = NSUserNotificationCenter.DefaultUserNotificationCenter;
+        ArgumentNullException.ThrowIfNull(Center, nameof(Center));
+
+        Center.DidActivateNotification += (sender, e) =>
         {
-            Console.WriteLine($"Notification activated: {e.Notification.Identifier}");
-            // _actionManager.OnActivated(new Guid(), e.Notification);
+            if (e.Notification.Identifier is not null && e.Notification.AdditionalActivationAction?.Identifier is not null)
+            {
+                ActivateAction(e.Notification.Identifier, e.Notification.AdditionalActivationAction.Identifier);
+            }
+            else if (e.Notification.Identifier is not null)
+            {
+                RemoveHistory(e.Notification.Identifier);
+            }
+
         };
-        _nsNotificationCenter.DidDeliverNotification += (sender, e) =>
+        Center.DidDeliverNotification += (sender, e) =>
         {
-            Console.WriteLine($"Notification Delivered: {e.Notification.Identifier}");
-            // _actionManager.OnActivated(new Guid(), e.Notification);
+            if (e.Notification.Identifier is string id)
+            {
+                SessionHistory.Get(id)?.SetIsAlive(true);
+            }
         };
-        _nsNotificationCenter.ShouldPresentNotification = (center, notification) =>
+        Center.ShouldPresentNotification = (center, notification) =>
         {
             return true;
         };
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         if (_disposed)
         {
             return;
         }
         RomoveAllNotifications();
-        _nsNotificationCenter.Dispose();
+        Center.Dispose();
         GC.SuppressFinalize(this);
         _disposed = true;
     }
 
-    public INotification Create()
+    public override INotification Create()
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(NSNotificationManager));
-        return new NSNotification(_nsNotificationCenter, _actionManager);
+        return new NSNotification(this);
     }
 
-    public IProgressNotification CreateProgress()
+    public override IProgressNotification CreateProgress()
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(NSNotificationManager));
         throw new NotImplementedException();
     }
 
-    public void RomoveAllNotifications()
+    public override void RomoveAllNotifications()
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(NSNotificationManager));
-        _nsNotificationCenter.RemoveAllDeliveredNotifications();
-        _actionManager.RemoveAll();
+        Center.RemoveAllDeliveredNotifications();
+        _actionManager.Reset();
+    }
+
+    public override IEnumerable<INotificationInternal<string>> GetAllNotifications()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, nameof(DBusNotificationManager));
+        var existIds = Center.DeliveredNotifications.Select(x => x.Identifier);
+        return SessionHistory.GetAll().Where(x => existIds.Contains(x.NotificationId));
     }
 
     ~NSNotificationManager() => Dispose();
