@@ -2,9 +2,8 @@
 
 public interface INotificationManager
 {
-    bool IsApplicationStartedByNotificationAction { get; }
-    string? LaunchActionId { get; }
-    event Action<string>? ActionActived;
+    bool IsAppLaunchedByNotification { get; }
+    event Action<NotificationActivatedEventArgs>? ActionActivated;
     INotification Shared { get; }
     INotification Create();
     IProgressNotification CreateProgress();

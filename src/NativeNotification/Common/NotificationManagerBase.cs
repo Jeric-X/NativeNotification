@@ -2,14 +2,13 @@
 
 namespace NativeNotification.Common;
 
-public abstract class NotificationManagerBase<TNotificationId> 
-    : INotificationManager, INotificationManagerInternal<TNotificationId> where TNotificationId : notnull
+public abstract class NotificationManagerBase : INotificationManager, INotificationManagerInternal
 {
-    protected SessionHistory<TNotificationId> SessionHistory { get; } = new(); 
+    protected SessionHistory SessionHistory { get; } = new();
 
     private INotification? _shared;
 
-    public event Action<string>? ActionActived;
+    public event Action<NotificationActivatedEventArgs>? ActionActivated;
 
     public INotification Shared
     {
@@ -20,34 +19,61 @@ public abstract class NotificationManagerBase<TNotificationId>
         }
     }
 
-    public virtual bool IsApplicationStartedByNotificationAction => false;
+    public virtual bool IsAppLaunchedByNotification => false;
     public virtual string? LaunchActionId { get; } = null;
 
     public abstract INotification Create();
     public virtual IProgressNotification CreateProgress() => throw new NotSupportedException("Progress notifications are not supported on current platform.");
     public abstract void RomoveAllNotifications();
 
-    public void RemoveHistory(TNotificationId notificationId)
+    protected virtual bool RemoveNotificationOnContentClick => true;
+
+    public void RemoveHistory(string notificationId)
     {
         SessionHistory.Remove(notificationId);
     }
 
-    public void AddHistory(TNotificationId notificationId, INotificationInternal<TNotificationId> notification)
+    public void AddHistory(string notificationId, INotificationInternal notification)
     {
         SessionHistory.AddSession(notificationId, notification);
     }
 
-    public void ActivateAction(TNotificationId notificationId, string actionId)
+    public virtual void ActivateNotification(string notificationId, string? actionId, INotification? notification = null, bool isLaunchedByNotification = false)
     {
-        var action = SessionHistory.GetAction(notificationId, actionId);
-        action?.Invoke();
-        ActionActived?.Invoke(actionId);
-        SessionHistory.Remove(notificationId);
+        notification ??= SessionHistory.GetNotification(notificationId);
+        if (actionId is not null)
+        {
+            var action = SessionHistory.GetAction(notificationId, actionId);
+            action?.Invoke();
+            SessionHistory.Remove(notificationId);
+        }
+        else
+        {
+            notification?.ContentAction?.Invoke();
+            if (OperatingSystem.IsMacOS() is false)
+            {
+                SessionHistory.Remove(notificationId);
+            }
+            else if (RemoveNotificationOnContentClick)
+            {
+                notification?.Remove();
+            }
+        }
+
+        var EventArgs = new NotificationActivatedEventArgs(notificationId)
+        {
+            ActionId = actionId,
+            Notification = notification,
+            Type = actionId is not null ? ActivatedType.ActionButtonClicked : ActivatedType.ContentClicked,
+            IsLaunchedActivation = isLaunchedByNotification
+        };
+
+        ActionActivated?.Invoke(EventArgs);
     }
 
-    public void ActivateAction(string actionId)
+    protected void TriggerActivationEvent(NotificationActivatedEventArgs eventArgs)
     {
-        ActionActived?.Invoke(actionId);
+        ActionActivated?.Invoke(eventArgs);
     }
 
     public virtual IEnumerable<INotification> GetAllNotifications()

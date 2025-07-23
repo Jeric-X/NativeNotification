@@ -5,55 +5,39 @@ using NativeNotification.Interface;
 
 namespace NativeNotification.MacOS;
 
-internal class NSNotificationManager : NotificationManagerBase<string>, INotificationManager
+internal class NSNotificationManager : NotificationManagerBase, INotificationManager
 {
     public NSUserNotificationCenter Center { get; }
-    private readonly SessionHistory<string> _actionManager = new();
-    private bool _isApplicationStartedByNotificationAction = false;
-    public override bool IsApplicationStartedByNotificationAction => _isApplicationStartedByNotificationAction;
-    public string? _launchActionId = null;
-    public override string? LaunchActionId => _launchActionId;
+    private readonly SessionHistory _actionManager = new();
+    private bool _isAppLaunchedByNotification = false;
+    public override bool IsAppLaunchedByNotification => _isAppLaunchedByNotification;
+    private NSObject? _didFinishLaunchingObserver = null;
+    private readonly NativeNotificationOption _config;
+    protected override bool RemoveNotificationOnContentClick => _config.RemoveNotificationOnContentClick;
 
-    public NSNotificationManager()
+    public NSNotificationManager(NativeNotificationOption? config = default)
     {
+        _config = config ?? new NativeNotificationOption();
         Center = NSUserNotificationCenter.DefaultUserNotificationCenter;
         ArgumentNullException.ThrowIfNull(Center, nameof(Center));
-        var token = NSApplication.Notifications.ObserveDidFinishLaunching((sender, arg) =>
+        _didFinishLaunchingObserver = NSApplication.Notifications.ObserveDidFinishLaunching((sender, arg) =>
         {
-            _isApplicationStartedByNotificationAction = arg.IsLaunchFromUserNotification;
             var nsUserNotification = arg.Notification?.UserInfo?[NSApplication.LaunchUserNotificationKey] as NSUserNotification;
+            _isAppLaunchedByNotification = arg.IsLaunchFromUserNotification && nsUserNotification is not null;
             if (nsUserNotification is not null)
             {
-                _launchActionId = nsUserNotification.AdditionalActivationAction?.Identifier;
-                if (_launchActionId is not null)
-                {
-                    ActivateAction(_launchActionId);
-                }
+                HandleActivateNotification(nsUserNotification, true);
             }
+            _didFinishLaunchingObserver?.Dispose();
+            _didFinishLaunchingObserver = null;
         });
 
-        Center.DidActivateNotification += (sender, e) =>
-        {
-            if (e.Notification.ActivationType != NSUserNotificationActivationType.AdditionalActionClicked)
-            {
-                return;
-            }
-
-            if (e.Notification.Identifier is not null && e.Notification.AdditionalActivationAction?.Identifier is not null)
-            {
-                ActivateAction(e.Notification.Identifier, e.Notification.AdditionalActivationAction.Identifier);
-            }
-            else if (e.Notification.Identifier is not null)
-            {
-                RemoveHistory(e.Notification.Identifier);
-            }
-
-        };
+        Center.DidActivateNotification += (sender, e) => HandleActivateNotification(e.Notification);
         Center.DidDeliverNotification += (sender, e) =>
         {
             if (e.Notification.Identifier is string id)
             {
-                SessionHistory.Get(id)?.SetIsAlive(true);
+                SessionHistory.GetNotification(id)?.SetIsAlive(true);
             }
         };
         Center.ShouldPresentNotification = (center, notification) =>
@@ -73,10 +57,36 @@ internal class NSNotificationManager : NotificationManagerBase<string>, INotific
         _actionManager.Reset();
     }
 
-    public override IEnumerable<INotificationInternal<string>> GetAllNotifications()
+    public override IEnumerable<INotificationInternal> GetAllNotifications()
     {
         var existIds = Center.DeliveredNotifications.Select(x => x.Identifier);
         return SessionHistory.GetAll().Where(x => existIds.Contains(x.NotificationId));
+    }
+
+    private void HandleActivateNotification(NSUserNotification nsUserNotification, bool isLaunchApp = false)
+    {
+        if (nsUserNotification.Identifier is null)
+        {
+            return;
+        }
+
+        if (nsUserNotification.ActivationType == NSUserNotificationActivationType.ContentsClicked)
+        {
+            ActivateNotification(nsUserNotification.Identifier, null, null, isLaunchApp);
+        }
+        if (nsUserNotification.ActivationType != NSUserNotificationActivationType.AdditionalActionClicked)
+        {
+            return;
+        }
+
+        if (nsUserNotification.Identifier is not null && nsUserNotification.AdditionalActivationAction?.Identifier is not null)
+        {
+            ActivateNotification(nsUserNotification.Identifier, nsUserNotification.AdditionalActivationAction.Identifier, null, isLaunchApp);
+        }
+        else if (nsUserNotification.Identifier is not null)
+        {
+            RemoveHistory(nsUserNotification.Identifier);
+        }
     }
 }
 

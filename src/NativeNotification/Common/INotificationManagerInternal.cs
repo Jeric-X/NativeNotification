@@ -1,6 +1,6 @@
 ﻿namespace NativeNotification.Common;
 
-internal interface INotificationManagerInternal<T> where T : notnull
+internal interface INotificationManagerInternal
 {
-    void RemoveHistory(T notificationId);
+    void RemoveHistory(string notificationId);
 }

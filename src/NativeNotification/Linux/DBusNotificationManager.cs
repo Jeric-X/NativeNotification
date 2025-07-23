@@ -6,7 +6,7 @@ using Tmds.DBus;
 namespace NativeNotification.Linux;
 
 [SupportedOSPlatform("linux")]
-internal sealed class DBusNotificationManager : NotificationManagerBase<uint>, IDisposable
+internal sealed class DBusNotificationManager : NotificationManagerBase, IDisposable
 {
     private bool _disposed = false;
     public IDbusNotifications DBus { get; }
@@ -19,8 +19,8 @@ internal sealed class DBusNotificationManager : NotificationManagerBase<uint>, I
         _config = config ?? new NativeNotificationOption();
 
         DBus = Connection.Session.CreateProxy<IDbusNotifications>("org.freedesktop.Notifications", "/org/freedesktop/Notifications");
-        var watchInvokeTask = DBus.WatchActionInvokedAsync(input => ActivateAction(input.id, input.actionKey));
-        var watchClosedTask = DBus.WatchNotificationClosedAsync(input => RemoveHistory(input.id));
+        var watchInvokeTask = DBus.WatchActionInvokedAsync(input => ActivateNotification(input.id.ToString(), input.actionKey));
+        var watchClosedTask = DBus.WatchNotificationClosedAsync(input => RemoveHistory(input.id.ToString()));
         _disposables.Add(watchInvokeTask.Result);
         _disposables.Add(watchClosedTask.Result);
     }
@@ -31,7 +31,6 @@ internal sealed class DBusNotificationManager : NotificationManagerBase<uint>, I
         {
             return;
         }
-        RomoveAllNotifications();
         _disposables.ForEach(disposable => disposable.Dispose());
         GC.SuppressFinalize(this);
         _disposed = true;

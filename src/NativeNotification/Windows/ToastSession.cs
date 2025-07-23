@@ -7,8 +7,7 @@ using Windows.UI.Notifications;
 
 namespace NativeNotification.Windows
 {
-    public class ToastSession(WindowsNotificationManager _manager)
-        : INotification, INotificationInternal<string>
+    public class ToastSession : INotification, INotificationInternal
     {
         public string? Title { get; set; }
         public string? Message { get; set; }
@@ -18,14 +17,37 @@ namespace NativeNotification.Windows
         public void SetIsAlive(bool IsAlive) => this.IsAlive = IsAlive;
         public string NotificationId => _tag;
         private ExpirationHelper? _expirationHelper;
-        private const string Group = "DEFAULT_GROUP";
+        private readonly string _group = "DEFAULT_GROUP";
         private readonly string _tag = Guid.NewGuid().ToString();
+        internal bool CreatedByToast { get; } = false;
+        private readonly WindowsNotificationManager _manager;
+
         private string? Text1 => Message;
         private string? Text2 { get; set; }
+        public Action? ContentAction { get; set; }
 
         private const string TOAST_BINDING_TITLE = "TOAST_BINDING_TITLE";
         private const string TOAST_BINDING_TEXT1 = "TOAST_BINDING_TEXT1";
         private const string TOAST_BINDING_TEXT2 = "TOAST_BINDING_TEXT2";
+
+        public ToastSession(WindowsNotificationManager manager)
+        {
+            _manager = manager;
+        }
+
+        public ToastSession(WindowsNotificationManager manager, ToastNotification toast)
+        {
+            _tag = toast.Tag;
+            _group = toast.Group;
+            _manager = manager;
+            var dataMap = toast.Data.Values;
+            Title = dataMap[TOAST_BINDING_TITLE];
+            Message = dataMap[TOAST_BINDING_TEXT1];
+            Text2 = dataMap[TOAST_BINDING_TEXT2];
+            toast.Activated += Toast_Activated;
+            toast.Dismissed += Toast_Dismissed;
+            CreatedByToast = true;
+        }
 
         protected virtual ToastContentBuilder GetBuilder()
         {
@@ -49,7 +71,7 @@ namespace NativeNotification.Windows
             var toast = new ToastNotification(builder.GetToastContent().GetXml())
             {
                 Tag = _tag,
-                Group = Group,
+                Group = _group,
                 Data = new NotificationData()
             };
             SetBingData(toast.Data);
@@ -73,11 +95,11 @@ namespace NativeNotification.Windows
                 return;
             if (args.Arguments.Length != 0)
             {
-                _manager.ActivateAction(_tag, args.Arguments);
+                _manager.ActivateNotification(NotificationId, args.Arguments, this);
             }
             else
             {
-                _manager.RemoveHistory(_tag);
+                _manager.ActivateNotification(NotificationId, null, this);
             }
         }
 
@@ -105,12 +127,12 @@ namespace NativeNotification.Windows
 
         public bool Update()
         {
-            return _manager.Center.Update(SetBingData(), _tag, Group) is NotificationUpdateResult.Succeeded;
+            return _manager.Center.Update(SetBingData(), _tag, _group) is NotificationUpdateResult.Succeeded;
         }
 
         public void Remove()
         {
-            ToastNotificationManagerCompat.History.Remove(_tag, Group);
+            ToastNotificationManagerCompat.History.Remove(_tag, _group);
             _manager.RemoveHistory(_tag);
         }
     }

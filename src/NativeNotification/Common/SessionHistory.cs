@@ -2,14 +2,14 @@ using NativeNotification.Interface;
 
 namespace NativeNotification.Common;
 
-public class SessionHistory<IdType> where IdType : notnull
+public class SessionHistory
 {
-    private readonly Dictionary<IdType, Dictionary<string, ActionButton>> _handlerList = [];
-    private Dictionary<IdType, INotificationInternal<IdType>> _sessionList = [];
+    private readonly Dictionary<string, Dictionary<string, ActionButton>> _handlerList = [];
+    private Dictionary<string, INotificationInternal> _sessionList = [];
 
-    public Action? GetAction(IdType id, string actionId)
+    public Action? GetAction(string notificationId, string actionId)
     {
-        if (_handlerList.TryGetValue(id, out var buttonList))
+        if (_handlerList.TryGetValue(notificationId, out var buttonList))
         {
             if (buttonList.TryGetValue(actionId, out var button))
             {
@@ -19,17 +19,20 @@ public class SessionHistory<IdType> where IdType : notnull
         return null;
     }
 
-    public void OnClosed(IdType id)
+    public bool IsActionExist(string actionId)
     {
-        _handlerList.Remove(id);
-        if (_sessionList.TryGetValue(id, out var session))
+        foreach (var buttonList in _handlerList.Values)
         {
-            session.SetIsAlive(false);
+            if (buttonList.ContainsKey(actionId))
+            {
+                return true;
+            }
         }
-        _sessionList.Remove(id);
+
+        return false;
     }
 
-    public void AddSession(IdType id, INotificationInternal<IdType> session)
+    public void AddSession(string id, INotificationInternal session)
     {
         if (session.Buttons.Count != 0)
         {
@@ -61,7 +64,7 @@ public class SessionHistory<IdType> where IdType : notnull
         }
     }
 
-    public void Remove(IdType id)
+    public void Remove(string id)
     {
         _handlerList.Remove(id);
         if (_sessionList.TryGetValue(id, out var session))
@@ -70,7 +73,7 @@ public class SessionHistory<IdType> where IdType : notnull
         }
         _sessionList.Remove(id);
     }
-    public INotificationInternal<IdType>? Get(IdType id)
+    public INotificationInternal? GetNotification(string id)
     {
         if (_sessionList.TryGetValue(id, out var session))
         {
@@ -79,7 +82,7 @@ public class SessionHistory<IdType> where IdType : notnull
         return null;
     }
 
-    public IEnumerable<INotificationInternal<IdType>> GetAll()
+    public IEnumerable<INotificationInternal> GetAll()
     {
         return _sessionList.Values;
     }

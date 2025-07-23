@@ -2,8 +2,7 @@
 
 namespace NativeNotification.Common;
 
-public interface INotificationInternal<IdType> : INotification
+public interface INotificationInternal : INotification
 {
     void SetIsAlive(bool IsAlive);
-    IdType NotificationId { get; }
 }

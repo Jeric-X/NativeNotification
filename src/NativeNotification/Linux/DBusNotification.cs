@@ -5,7 +5,7 @@ using System.Runtime.Versioning;
 namespace NativeNotification.Linux;
 
 [SupportedOSPlatform("linux")]
-internal class DBusNotification(NativeNotificationOption _config, DBusNotificationManager _manager) : INotification, INotificationInternal<uint>
+internal class DBusNotification(NativeNotificationOption _config, DBusNotificationManager _manager) : INotification, INotificationInternal
 {
     public string? Title { get; set; }
     public string? Message { get; set; }
@@ -16,7 +16,11 @@ internal class DBusNotification(NativeNotificationOption _config, DBusNotificati
 
     private ExpirationHelper? _expirationHelper;
     private uint? _notificationId;
-    public uint NotificationId => _notificationId ?? 0;
+    public uint InternalNotificationId => _notificationId ?? 0;
+    public string NotificationId => InternalNotificationId.ToString();
+
+    public Action? ContentAction { get; set; }
+
     private DateTimeOffset? _expirationTime;
 
     protected void NativeShow(NotificationDeliverOption? config = null)
@@ -52,7 +56,7 @@ internal class DBusNotification(NativeNotificationOption _config, DBusNotificati
         _notificationId = Task.Run(async () =>
             await _manager.DBus.NotifyAsync(
                 _config.AppName ?? string.Empty,
-                NotificationId,
+                InternalNotificationId,
                 _config.AppIcon ?? string.Empty,
                 Title ?? string.Empty,
                 Message ?? string.Empty,
@@ -88,6 +92,6 @@ internal class DBusNotification(NativeNotificationOption _config, DBusNotificati
 
     public void Remove()
     {
-        _manager.DBus.CloseNotificationAsync(NotificationId);
+        _manager.DBus.CloseNotificationAsync(InternalNotificationId);
     }
 }

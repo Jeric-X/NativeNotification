@@ -6,12 +6,13 @@ using NativeNotification.Interface;
 
 namespace NativeNotification.MacOS;
 
-internal class NSNotification(NSNotificationManager _manager) : INotification, INotificationInternal<string>
+internal class NSNotification(NSNotificationManager _manager) : INotification, INotificationInternal
 {
     public string? Title { get; set; }
     public string? Message { get; set; }
     public Uri? Image { get; set; }
     public List<ActionButton> Buttons { get; set; } = [];
+    public Action? ContentAction { get; set; }
 
     private bool isAlive = false;
     public bool IsAlive

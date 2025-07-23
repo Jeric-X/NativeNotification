@@ -4,17 +4,17 @@ namespace NativeNotification.Example;
 
 internal class Program
 {
-    static INotificationManager Manager { get; } = ManagerFactory.GetNotificationManager();
+    static INotificationManager Manager { get; set; } = ManagerFactory.GetNotificationManager();
     static void Main(string[] _)
     {
 #if DEBUG
-        // bool ok = false;
-        // System.Diagnostics.Debugger.Launch();
-        // while (!ok)
-        // {
-        //     System.Diagnostics.Debugger.Break();
-        //     Thread.Sleep(1000);
-        // }
+        //bool ok = false;
+        System.Diagnostics.Debugger.Launch();
+        //while (!ok)
+        //{
+        //    System.Diagnostics.Debugger.Break();
+        //    Thread.Sleep(1000);
+        //}
 #endif
 #if MACOS
         NSApplication.Init();
@@ -27,10 +27,9 @@ internal class Program
 
     static void ShowSamples()
     {
-        Manager.ActionActived += (actionId) =>
+        Manager.ActionActivated += (args) =>
         {
-            Console.WriteLine($"Action id '{actionId}' actived.");
-            File.WriteAllText("/Users/jericx/sw/a.txt", actionId);
+            Console.WriteLine($"Actived, id '{args.NotificationId}', type {args.Type}, actionId '{args.ActionId}', isLaunchedAction {args.IsLaunchedActivation}");
         };
         Console.WriteLine("c: clear all notifications");
         Console.WriteLine("q: quit");
@@ -46,7 +45,7 @@ internal class Program
         };
         while (true)
         {
-            Console.Write("Input: ");
+            Console.WriteLine("Input: ");
             string input = Console.ReadLine() ?? string.Empty;
             input = input.Trim();
             if (input == "q")
@@ -100,7 +99,7 @@ internal class Program
         imagePath = Path.Combine("Contents/Resources", imagePath);
 #endif
         notification.Image = new Uri(Path.GetFullPath(imagePath));
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 5; i++)
         {
             int idx = i;
             notification.Buttons.Add(new ActionButton($"Button {idx + 1}", $"button id {idx + 1}"));

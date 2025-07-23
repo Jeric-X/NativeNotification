@@ -22,7 +22,7 @@ public class ManagerFactory
 #if MACOS
         if (OperatingSystem.IsMacOS())
         {
-            return new NSNotificationManager();
+            return new NSNotificationManager(option);
         }
 #endif
         if (OperatingSystem.IsLinux())

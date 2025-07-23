@@ -9,34 +9,73 @@ using Windows.UI.Notifications;
 
 namespace NativeNotification.Windows;
 
-public partial class WindowsNotificationManager : NotificationManagerBase<string>, IDisposable
+public partial class WindowsNotificationManager : NotificationManagerBase
 {
-    private bool _disposed = false;
     public readonly ToastNotifier Center;
+    private readonly bool _isAppLaunchedByNotification = false;
+    public override bool IsAppLaunchedByNotification => _isAppLaunchedByNotification;
+    private bool _lauchEventTrigged = false;
+    private bool _previousNotificationAdded = false;
+
     public WindowsNotificationManager(NativeNotificationOption? config = default)
     {
         Center = ToastNotificationManager.CreateToastNotifier(RegistFromCurrentProcess(config?.AppName));
-        // 向系统注册通知按钮回调，如果不注册，系统会打开新的进程；真正的回调在ToastSession中
-        ToastNotificationManagerCompat.OnActivated += (args) => { };
+        _isAppLaunchedByNotification = ToastNotificationManagerCompat.WasCurrentProcessToastActivated();
+        if (_isAppLaunchedByNotification is false)
+        {
+            AddPreviousNotification();
+        }
+
+        ToastNotificationManagerCompat.OnActivated += (args) =>
+        {
+            AddPreviousNotification();
+        };
+    }
+
+    private void AddPreviousNotification()
+    {
+        if (_previousNotificationAdded)
+        {
+            return;
+        }
+        _previousNotificationAdded = true;
+        var list = ToastNotificationManagerCompat.History.GetHistory();
+        foreach (var toast in list)
+        {
+            var notification = new ToastSession(this, toast);
+            SessionHistory.AddSession(notification.NotificationId, notification);
+        }
     }
 
     public override INotification Create()
     {
-        ObjectDisposedException.ThrowIf(_disposed, nameof(WindowsNotificationManager));
         return new ToastSession(this);
     }
 
     public override IProgressNotification CreateProgress()
     {
-        ObjectDisposedException.ThrowIf(_disposed, nameof(WindowsNotificationManager));
         return new ProgressSession(this);
     }
 
     public override void RomoveAllNotifications()
     {
-        ObjectDisposedException.ThrowIf(_disposed, nameof(WindowsNotificationManager));
         SessionHistory.Reset();
         ToastNotificationManagerCompat.History.Clear();
+    }
+
+    public override void ActivateNotification(string notificationId, string? actionId, INotification? notification = null, bool isLaunchedByNotification = false)
+    {
+        if (_isAppLaunchedByNotification && _lauchEventTrigged is false)
+        {
+            if (notification is ToastSession toastSession && toastSession.CreatedByToast)
+            {
+                _lauchEventTrigged = true;
+                base.ActivateNotification(notificationId, actionId, notification, true);
+                return;
+            }
+        }
+
+        base.ActivateNotification(notificationId, actionId, notification, isLaunchedByNotification);
     }
 
     [LibraryImport("shell32.dll", SetLastError = true)]
@@ -75,22 +114,6 @@ public partial class WindowsNotificationManager : NotificationManagerBase<string
 
         shortcut.Save(shortcutFile);
         return aumid;
-    }
-
-    ~WindowsNotificationManager()
-    {
-        Dispose();
-    }
-
-    public override void Dispose()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-        _disposed = true;
-        UnRegistFromCurrentProcess();
-        GC.SuppressFinalize(this);
     }
 }
 
