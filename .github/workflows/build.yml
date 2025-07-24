@@ -28,24 +28,19 @@ jobs:
     - name: Generate change log
       run: ./.github/workflows/GenerateChangeLog.bat
 
-    - name: Read file
-      uses: juliangruber/read-file-action@v1.1.7
-      with:
-        path: changes.txt
-
     - name: Pack
       working-directory: ./src
+      # https://github.com/dotnet/msbuild/issues/2999#issuecomment-366101535
       run: |
-        # https://github.com/dotnet/msbuild/issues/2999#issuecomment-366101535
         $notes = (Get-Content ../changes.txt -Raw) -replace ',', '%2c'
-        dotnet pack --output ../nuget /p:ContinuousIntegrationBuild=true /p:PackageReleaseNotes=$notes
+        dotnet pack --output ../nupkgs /p:ContinuousIntegrationBuild=true /p:PackageReleaseNotes=$notes
       shell: pwsh
 
     - name: Upload nupkgs
       uses: actions/upload-artifact@v4
       with:
-          name: nupkg
-          path: nuget/
+          name: nupkgs
+          path: nupkgs/
 
     - name: Upload change log
       uses: actions/upload-artifact@v4

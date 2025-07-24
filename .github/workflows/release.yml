@@ -1,0 +1,37 @@
+name: release
+
+permissions:
+  contents: write
+
+on:
+  workflow_call:
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Download last-job-built change log
+        uses: actions/download-artifact@v4
+        with:
+          name: change-log
+
+      - name: Download nupkgs
+        uses: actions/download-artifact@v4
+        with:
+          name: nupkgs
+          path: nupkgs
+
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          draft: false
+          allowUpdates: false
+          prerelease: ${{ contains(github.ref_name, 'beta') }}
+          bodyFile: changes.txt
+          artifacts: nupkgs/*
+
+      - name: Push to nuget.org
+        run: |
+          Get-ChildItem -Path "nupkgs" -Filter *.nupkg | ForEach-Object {
+            dotnet nuget push $_.FullName --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+          }
