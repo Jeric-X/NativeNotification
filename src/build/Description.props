@@ -1,0 +1,14 @@
+<Project>
+    <PropertyGroup>
+		<Version>1.0.0</Version>
+		<Authors>Jeric-X</Authors>
+		<PackageTags>Notification</PackageTags>
+		<Description>A C# library for sending native notifications on different desktop platforms.</Description>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/Jeric-X/NativeNotification</PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+	<ItemGroup>
+		<None Include="../../README.md" Pack="true" PackagePath="\"/>
+	</ItemGroup>
+</Project>

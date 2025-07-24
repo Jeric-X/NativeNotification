@@ -1,0 +1,54 @@
+name: build
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      working-directory: ./src
+      run: |
+        dotnet workload restore
+        dotnet restore
+
+    - name: Format check
+      working-directory: ./src
+      run: dotnet format --verify-no-changes --no-restore  --severity info
+
+    - name: Generate change log
+      run: ./.github/workflows/GenerateChangeLog.bat
+
+    - name: Read file
+      uses: juliangruber/read-file-action@v1.1.7
+      with:
+        path: changes.txt
+
+    - name: Pack
+      working-directory: ./src
+      run: |
+        # https://github.com/dotnet/msbuild/issues/2999#issuecomment-366101535
+        $notes = (Get-Content ../changes.txt -Raw) -replace ',', '%2c'
+        dotnet pack --output ../nuget /p:ContinuousIntegrationBuild=true /p:PackageReleaseNotes=$notes
+      shell: pwsh
+
+    - name: Upload nupkgs
+      uses: actions/upload-artifact@v4
+      with:
+          name: nupkg
+          path: nuget/
+
+    - name: Upload change log
+      uses: actions/upload-artifact@v4
+      with:
+          name: change-log
+          path: changes.txt

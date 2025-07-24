@@ -4,10 +4,13 @@
 		<OutputType>Exe</OutputType>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
 		<BuildOnWin Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</BuildOnWin>
 		<BuildOnMac Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</BuildOnMac>
 		<BuildOnLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</BuildOnLinux>
 	</PropertyGroup>
+
+	<Import Project="../build/Description.props"/>
 
 	<PropertyGroup Condition="'$(BuildOnMac)'=='true'">
 		<TargetFramework>net8.0-macos</TargetFramework>
