@@ -1,11 +1,14 @@
 <Project>
     <PropertyGroup>
-		<Version>1.0.0-beta1</Version>
+		<Version>1.0.0-beta2</Version>
 		<Authors>Jeric-X</Authors>
 		<PackageTags>Notification</PackageTags>
 		<Description>A C# library for sending native notifications on different desktop platforms.</Description>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/Jeric-X/NativeNotification</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/Jeric-X/NativeNotification.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<Copyright>Copyright (c) Jeric-X 2025</Copyright>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 	<ItemGroup>

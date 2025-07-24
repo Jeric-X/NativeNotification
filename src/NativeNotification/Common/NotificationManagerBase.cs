@@ -23,7 +23,8 @@ public abstract class NotificationManagerBase : INotificationManager, INotificat
     public virtual string? LaunchActionId { get; } = null;
 
     public abstract INotification Create();
-    public virtual IProgressNotification CreateProgress() => throw new NotSupportedException("Progress notifications are not supported on current platform.");
+    public abstract IProgressNotification CreateProgress(bool suppressNotSupportedException);
+    public IProgressNotification CreateProgress() => CreateProgress(false);
     public abstract void RomoveAllNotifications();
 
     protected virtual bool RemoveNotificationOnContentClick => true;
@@ -79,5 +80,18 @@ public abstract class NotificationManagerBase : INotificationManager, INotificat
     public virtual IEnumerable<INotification> GetAllNotifications()
     {
         return SessionHistory.GetAll();
+    }
+
+    public INotification Show(string title, string message, IEnumerable<ActionButton>? actions)
+    {
+        var notification = Create();
+        notification.Title = title;
+        notification.Message = message;
+        if (actions is not null)
+        {
+            notification.Buttons.AddRange(actions);
+        }
+        notification.Show();
+        return notification;
     }
 }

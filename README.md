@@ -1,6 +1,6 @@
 # NativeNotification
 
-A C# library for sending native system notifications on different desktop platforms. Supporting Windows(toast notification), Linux(freedesktop.org), macOS(NSUserNotification)
+A C# library for sending native system notifications across multiple desktop platforms. Supports Windows (toast notifications), Linux (freedesktop.org), and macOS (NSUserNotification).
 
 ```csharp
 var manager = ManagerFactory.GetNotificationManager(new NativeNotificationOption() { AppName = "AppName" });

@@ -2,6 +2,7 @@
 
 using NativeNotification.Common;
 using NativeNotification.Interface;
+using NativeNotification.Linux;
 
 namespace NativeNotification.MacOS;
 
@@ -64,6 +65,15 @@ internal class NSNotificationManager : NotificationManagerBase, INotificationMan
     {
         Center.RemoveAllDeliveredNotifications();
         SessionHistory.Reset();
+    }
+
+    public override IProgressNotification CreateProgress(bool suppressNotSupportedException)
+    {
+        if (suppressNotSupportedException)
+        {
+            return new DummyProgressNotification();
+        }
+        throw new NotSupportedException("ProgressNotification is not support on this platform.");
     }
 
     public override IEnumerable<INotificationInternal> GetAllNotifications()

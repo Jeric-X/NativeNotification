@@ -52,7 +52,7 @@ public partial class WindowsNotificationManager : NotificationManagerBase
         return new ToastSession(this);
     }
 
-    public override IProgressNotification CreateProgress()
+    public override IProgressNotification CreateProgress(bool suppressNotSupportedException)
     {
         return new ProgressSession(this);
     }

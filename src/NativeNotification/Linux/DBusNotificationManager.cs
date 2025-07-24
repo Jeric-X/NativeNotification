@@ -42,10 +42,14 @@ internal sealed class DBusNotificationManager : NotificationManagerBase, IDispos
         return new DBusNotification(_config, this);
     }
 
-    public override IProgressNotification CreateProgress()
+    public override IProgressNotification CreateProgress(bool suppressNotSupportedException)
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(DBusNotificationManager));
-        throw new NotImplementedException();
+        if (suppressNotSupportedException)
+        {
+            return new DummyProgressNotification();
+        }
+        throw new NotSupportedException("ProgressNotification is not support on this platform.");
     }
 
     public override void RomoveAllNotifications()
