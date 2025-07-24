@@ -1,4 +1,5 @@
 # NativeNotification
+[![NuGet Version](https://img.shields.io/nuget/v/NativeNotification)](https://www.nuget.org/packages/NativeNotification)
 
 A C# library for sending native system notifications across multiple desktop platforms. Supports Windows (toast notifications), Linux (freedesktop.org), and macOS (NSUserNotification).
 
