@@ -52,8 +52,6 @@ internal class DBusNotification(NativeNotificationOption _config, DBusNotificati
             };
         }
         var duration = ExpirationHelper.GetExpirationDuration(config);
-
-        _manager.AddHistory(NotificationId, this);
         _notificationId = Task.Run(async () =>
             await _manager.DBus.NotifyAsync(
                 _config.AppName ?? string.Empty,
@@ -66,8 +64,9 @@ internal class DBusNotification(NativeNotificationOption _config, DBusNotificati
                 (int?)duration?.TotalMilliseconds ?? 0
             )
         ).Result;
-        IsAlive = true;
+        _manager.AddHistory(NotificationId, this);
 
+        IsAlive = true;
         if (duration.HasValue)
         {
             _expirationTime = DateTimeOffset.Now.Add(duration.Value);

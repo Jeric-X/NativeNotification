@@ -4,6 +4,7 @@
 		<TargetFrameworks>net8.0-windows10.0.17763.0;net8.0;net8.0-macos</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<DebugType>embedded</DebugType>
 	</PropertyGroup>
 
 	<Import Project="../build/Description.props"/>
