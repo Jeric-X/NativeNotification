@@ -1,7 +1,4 @@
-#if WINDOWS
-
 using Microsoft.Toolkit.Uwp.Notifications;
-using NativeNotification.Common;
 using NativeNotification.Interface;
 using Windows.UI.Notifications;
 
@@ -50,4 +47,3 @@ public class ProgressSession(WindowsNotificationManager manager)
         return data;
     }
 }
-#endif

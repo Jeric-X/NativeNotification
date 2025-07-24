@@ -7,7 +7,7 @@
 		<DebugType>embedded</DebugType>
 	</PropertyGroup>
 
-	<Import Project="../build/Description.props"/>
+	<Import Project="../build/Description.props" />
 
 	<PropertyGroup>
 		<BuildOnWin Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</BuildOnWin>
@@ -29,16 +29,31 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\NativeNotification.Interface\NativeNotification.Interface.csproj" />
-	</ItemGroup>
-
 	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows10.0.17763.0'">
 		<PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.3" />
 	</ItemGroup>
 
-	<ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
 		<PackageReference Include="Tmds.DBus" Version="0.18.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
+		<Compile Remove="Linux/*" />
+		<None Include="Linux/*" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' != 'net8.0-macos'">
+		<Compile Remove="MacOS/*" />
+		<None Include="MacOS/*" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' != 'net8.0-windows10.0.17763.0'">
+		<Compile Remove="Windows/*" />
+		<None Include="Windows/*" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\NativeNotification.Interface\NativeNotification.Interface.csproj" />
 	</ItemGroup>
 
 </Project>

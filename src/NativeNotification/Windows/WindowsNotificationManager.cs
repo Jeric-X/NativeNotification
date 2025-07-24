@@ -1,6 +1,4 @@
-﻿#if WINDOWS
-
-using Microsoft.Toolkit.Uwp.Notifications;
+﻿using Microsoft.Toolkit.Uwp.Notifications;
 using NativeNotification.Common;
 using NativeNotification.Interface;
 using System.Diagnostics;
@@ -116,5 +114,3 @@ public partial class WindowsNotificationManager : NotificationManagerBase
         return aumid;
     }
 }
-
-#endif

@@ -1,8 +1,5 @@
-﻿#if MACOS
-
-using NativeNotification.Common;
+﻿using NativeNotification.Common;
 using NativeNotification.Interface;
-using NativeNotification.Linux;
 
 namespace NativeNotification.MacOS;
 
@@ -31,7 +28,7 @@ internal class NSNotificationManager : NotificationManagerBase, INotificationMan
                     SessionHistory.AddSession(notification.NotificationId, notification);
                 }
             }
-        
+
             var nsUserNotification = arg.Notification?.UserInfo?[NSApplication.LaunchUserNotificationKey] as NSUserNotification;
             _isAppLaunchedByNotification = arg.IsLaunchFromUserNotification && nsUserNotification is not null;
             if (nsUserNotification is not null)
@@ -108,5 +105,3 @@ internal class NSNotificationManager : NotificationManagerBase, INotificationMan
         }
     }
 }
-
-#endif

@@ -1,6 +1,4 @@
-﻿#if MACOS
-
-using NativeNotification.Common;
+﻿using NativeNotification.Common;
 using NativeNotification.Interface;
 
 namespace NativeNotification.MacOS;
@@ -119,5 +117,3 @@ internal class NSNotification : INotification, INotificationInternal
         _manager.RemoveHistory(NotificationId);
     }
 }
-
-#endif

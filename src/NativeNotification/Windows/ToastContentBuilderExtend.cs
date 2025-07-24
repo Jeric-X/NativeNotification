@@ -1,4 +1,3 @@
-#if WINDOWS
 using Microsoft.Toolkit.Uwp.Notifications;
 using NativeNotification.Interface;
 
@@ -18,4 +17,3 @@ namespace NativeNotification.Windows
         }
     }
 }
-#endif
