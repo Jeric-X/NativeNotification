@@ -40,6 +40,7 @@ internal class NSNotification : INotification, INotificationInternal
     }
     public void SetIsAlive(bool IsAlive) => this.IsAlive = IsAlive;
 
+    internal static readonly NSString ActionButtonIdKey = new("_NativeNotification._ActionButtonId");
     private ExpirationHelper? _expirationHelper;
     private readonly NSNotificationManager _manager;
 
@@ -50,13 +51,22 @@ internal class NSNotification : INotification, INotificationInternal
 
     public NSNotification(NSNotificationManager manager, NSUserNotification notification)
     {
+        NotificationId = notification.Identifier ?? GetGuid();
         _manager = manager;
         Title = notification.Title;
         Message = notification.InformativeText;
         _nsImage = notification.ContentImage;
-        Buttons = notification.AdditionalActions?
-            .Where(x => x.Identifier is not null && x.Title is not null)
-            .Select(x => new ActionButton(x.Title!, x.Identifier!)).ToList() ?? [];
+        var actionButtonId = notification.UserInfo?[ActionButtonIdKey] as NSString;
+        if (actionButtonId is not null)
+        {
+            var action = new ActionButton(notification.ActionButtonTitle, actionButtonId.ToString());
+            var additionalActions = notification.AdditionalActions?
+                .Where(x => x.Identifier is not null && x.Title is not null)
+                .Select(x => new ActionButton(x.Title!, x.Identifier!)) ?? [];
+            Buttons.Add(action);
+            Buttons.AddRange(additionalActions);
+        }
+
         ContentAction = null;
         IsAlive = true;
         IsCreatedByCurrentProcess = false;
@@ -79,16 +89,29 @@ internal class NSNotification : INotification, INotificationInternal
             actionList.Add(NSUserNotificationAction.GetAction(button.ActionId, button.Text));
         }
 
+        var additionalActions = Buttons.Skip(1)
+            .Select(button => NSUserNotificationAction.GetAction(button.ActionId, button.Text))
+            .ToArray();
+
         var notification = new NSUserNotification
         {
             Identifier = NotificationId,
             Title = Title,
             InformativeText = Message,
             SoundName = config?.Silent is true ? null : NSUserNotification.NSUserNotificationDefaultSoundName,
-            AdditionalActions = [.. actionList],
-            HasActionButton = false,
+            AdditionalActions = additionalActions,
+            HasActionButton = Buttons.Count > 0,
+            ActionButtonTitle = Buttons.Count > 0 ? Buttons[0].Text : string.Empty,
             ContentImage = _nsImage
         };
+        if (Buttons.Count > 0)
+        {
+            notification.UserInfo = new NSMutableDictionary()
+            {
+                [ActionButtonIdKey] = new NSString(Buttons[0].ActionId)
+            };
+        }
+        notification.SetValueForKey(NSNumber.FromBoolean(true), new NSString("_showsButtons"));
 
         _manager.AddHistory(NotificationId, this);
         _manager.Center.DeliverNotification(notification);

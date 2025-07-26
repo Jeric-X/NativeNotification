@@ -16,10 +16,8 @@ public interface INotificationManager
     /// </summary>
     IProgressNotification CreateProgress();
 
-    /// <summary>
-    /// Shows a notification with the specified title and message.
-    /// </summary>
     INotification Show(string title, string message, IEnumerable<ActionButton>? actions);
+    INotification Show(string title, string message);
 
     /// <summary>
     /// If the current platform supports progress notifications, returns an <c>IProgressNotification</c> instance; otherwise,

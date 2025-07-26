@@ -19,7 +19,7 @@ internal sealed class DBusNotificationManager : NotificationManagerBase, IDispos
         _config = config ?? new NativeNotificationOption();
 
         DBus = Connection.Session.CreateProxy<IDbusNotifications>("org.freedesktop.Notifications", "/org/freedesktop/Notifications");
-        var watchInvokeTask = DBus.WatchActionInvokedAsync(input => ActivateNotification(input.id.ToString(), input.actionKey));
+        var watchInvokeTask = DBus.WatchActionInvokedAsync(input => ActivateButtonClicked(input.id.ToString(), input.actionKey));
         var watchClosedTask = DBus.WatchNotificationClosedAsync(input => RemoveHistory(input.id.ToString()));
         _disposables.Add(watchInvokeTask.Result);
         _disposables.Add(watchClosedTask.Result);

@@ -22,7 +22,7 @@
             "preLaunchTask": "build macOS",
             "program": "${workspaceFolder}/NativeNotification.Example/bin/Debug/net8.0-macos/osx-x64/NativeNotification.Example.app/Contents/MacOS/NativeNotification.Example",
             "cwd": "${workspaceFolder}",
-            "console": "integratedTerminal",
+            "console": "internalConsole",
             "stopAtEntry": false,
             "internalConsoleOptions": "openOnSessionStart",
         },

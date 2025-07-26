@@ -39,39 +39,47 @@ public abstract class NotificationManagerBase : INotificationManager, INotificat
         SessionHistory.AddSession(notificationId, notification);
     }
 
-    public virtual void ActivateNotification(string notificationId, string? actionId, INotification? notification = null, bool isLaunchedByNotification = false)
+    internal virtual void ActivateContentClicked(string notificationId, INotification? notification = null, bool isLaunchedByNotification = false)
     {
         notification ??= SessionHistory.GetNotification(notificationId);
+        if (OperatingSystem.IsMacOS() is false)
+        {
+            SessionHistory.Remove(notificationId);
+        }
+        else if (RemoveNotificationOnContentClick)
+        {
+            notification?.Remove();
+        }
+
+        var EventArgs = new NotificationActivatedEventArgs(notificationId)
+        {
+            Notification = notification ?? SessionHistory.GetNotification(notificationId),
+            Type = ActivatedType.ContentClicked,
+            IsLaunchedActivation = isLaunchedByNotification
+        };
+
+        notification?.ContentAction?.Invoke();
+        ActionActivated?.Invoke(EventArgs);
+    }
+
+    internal virtual void ActivateButtonClicked(string notificationId, string? actionId, INotification? notification = null, bool isLaunchedByNotification = false)
+    {
         if (actionId is not null)
         {
             var action = SessionHistory.GetAction(notificationId, actionId);
             action?.Invoke();
             SessionHistory.Remove(notificationId);
         }
-        else
-        {
-            notification?.ContentAction?.Invoke();
-            if (OperatingSystem.IsMacOS() is false)
-            {
-                SessionHistory.Remove(notificationId);
-            }
-            else if (RemoveNotificationOnContentClick)
-            {
-                notification?.Remove();
-            }
-        }
-
         var EventArgs = new NotificationActivatedEventArgs(notificationId)
         {
             ActionId = actionId,
-            Notification = notification,
+            Notification = notification ?? SessionHistory.GetNotification(notificationId),
             Type = actionId is not null ? ActivatedType.ActionButtonClicked : ActivatedType.ContentClicked,
             IsLaunchedActivation = isLaunchedByNotification
         };
 
         ActionActivated?.Invoke(EventArgs);
     }
-
     protected void TriggerActivationEvent(NotificationActivatedEventArgs eventArgs)
     {
         ActionActivated?.Invoke(eventArgs);
@@ -93,5 +101,10 @@ public abstract class NotificationManagerBase : INotificationManager, INotificat
         }
         notification.Show();
         return notification;
+    }
+
+    public INotification Show(string title, string message)
+    {
+        return Show(title, message, null);
     }
 }

@@ -61,19 +61,35 @@ public partial class WindowsNotificationManager : NotificationManagerBase
         ToastNotificationManagerCompat.History.Clear();
     }
 
-    public override void ActivateNotification(string notificationId, string? actionId, INotification? notification = null, bool isLaunchedByNotification = false)
+    private bool IsLaunchedByNotification()
     {
         if (_isAppLaunchedByNotification && _lauchEventTrigged is false)
         {
-            if (notification is ToastSession toastSession && toastSession.IsCreatedByCurrentProcess is false)
-            {
-                _lauchEventTrigged = true;
-                base.ActivateNotification(notificationId, actionId, notification, true);
-                return;
-            }
+            return true;
         }
+        return false;
+    }
 
-        base.ActivateNotification(notificationId, actionId, notification, isLaunchedByNotification);
+    internal override void ActivateContentClicked(string notificationId, INotification? notification = null, bool isLaunchedByNotification = false)
+    {
+        if (IsLaunchedByNotification())
+        {
+            base.ActivateContentClicked(notificationId, notification, true);
+            _lauchEventTrigged = true;
+            return;
+        }
+        base.ActivateContentClicked(notificationId, notification, isLaunchedByNotification);
+    }
+
+    internal override void ActivateButtonClicked(string notificationId, string? actionId, INotification? notification = null, bool isLaunchedByNotification = false)
+    {
+        if (IsLaunchedByNotification())
+        {
+            base.ActivateButtonClicked(notificationId, actionId, notification, true);
+            _lauchEventTrigged = true;
+            return;
+        }
+        base.ActivateButtonClicked(notificationId, actionId, notification, isLaunchedByNotification);
     }
 
     [LibraryImport("shell32.dll", SetLastError = true)]

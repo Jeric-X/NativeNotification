@@ -94,11 +94,11 @@ namespace NativeNotification.Windows
                 return;
             if (args.Arguments.Length != 0)
             {
-                _manager.ActivateNotification(NotificationId, args.Arguments, this);
+                _manager.ActivateButtonClicked(NotificationId, args.Arguments, this);
             }
             else
             {
-                _manager.ActivateNotification(NotificationId, null, this);
+                _manager.ActivateContentClicked(NotificationId, this);
             }
         }
 

@@ -8,14 +8,17 @@ internal class Program
     static void Main(string[] _)
     {
 #if DEBUG
-        // bool ok = false;
+#if WINDOWS
         // System.Diagnostics.Debugger.Launch();
+#endif
+        // bool ok = false;
         // while (!ok)
         // {
         //     System.Diagnostics.Debugger.Break();
         //     Thread.Sleep(1000);
         // }
 #endif
+
 #if MACOS
         NSApplication.Init();
         Task.Run(ShowSamples);

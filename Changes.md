@@ -1,3 +1,7 @@
+# v1.0.1
+- Remove DBus dependency on macOS and Windows.
+- Fix macOS buttons on old OS versions.
+
 # v1.0.0
 - A C# library for sending native system notifications across desktop platforms.
 - Supports Windows (toast notifications), Linux (freedesktop.org), and macOS (NSUserNotification).

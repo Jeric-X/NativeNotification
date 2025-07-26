@@ -86,18 +86,24 @@ internal class NSNotificationManager : NotificationManagerBase, INotificationMan
             return;
         }
 
+        var notification = SessionHistory.GetNotification(nsUserNotification.Identifier);
         if (nsUserNotification.ActivationType == NSUserNotificationActivationType.ContentsClicked)
         {
-            ActivateNotification(nsUserNotification.Identifier, null, null, isLaunchApp);
+            ActivateContentClicked(nsUserNotification.Identifier, notification, isLaunchApp);
         }
-        if (nsUserNotification.ActivationType != NSUserNotificationActivationType.AdditionalActionClicked)
+        else if (nsUserNotification.ActivationType == NSUserNotificationActivationType.ActionButtonClicked)
+        {
+            var actionId = nsUserNotification.UserInfo?[NSNotification.ActionButtonIdKey] as NSString;
+            ActivateButtonClicked(nsUserNotification.Identifier, actionId, notification, isLaunchApp);
+        }
+        else if (nsUserNotification.ActivationType != NSUserNotificationActivationType.AdditionalActionClicked)
         {
             return;
         }
 
         if (nsUserNotification.Identifier is not null && nsUserNotification.AdditionalActivationAction?.Identifier is not null)
         {
-            ActivateNotification(nsUserNotification.Identifier, nsUserNotification.AdditionalActivationAction.Identifier, null, isLaunchApp);
+            ActivateButtonClicked(nsUserNotification.Identifier, nsUserNotification.AdditionalActivationAction.Identifier, notification, isLaunchApp);
         }
         else if (nsUserNotification.Identifier is not null)
         {
