@@ -1,17 +1,17 @@
 <Project>
     <PropertyGroup>
-		<Version>1.0.1</Version>
-		<Authors>Jeric-X</Authors>
-		<PackageTags>Notification</PackageTags>
-		<Description>A C# library for sending native notifications on different desktop platforms.</Description>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageProjectUrl>https://github.com/Jeric-X/NativeNotification</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/Jeric-X/NativeNotification.git</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
-		<Copyright>Copyright (c) Jeric-X 2025</Copyright>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
+        <Version>1.0.1</Version>
+        <Authors>Jeric-X</Authors>
+        <PackageTags>Notification</PackageTags>
+        <Description>A C# library for sending native notifications on different desktop platforms.</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/Jeric-X/NativeNotification</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Jeric-X/NativeNotification.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <Copyright>Copyright (c) Jeric-X 2025</Copyright>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
-	<ItemGroup>
-		<None Include="../../README.md" Pack="true" PackagePath="\"/>
-	</ItemGroup>
+    <ItemGroup>
+        <None Include="../../README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
 </Project>
