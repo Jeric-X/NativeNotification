@@ -3,6 +3,13 @@
 
 A C# library for sending native system notifications across multiple desktop platforms. Supports Windows (toast notifications), Linux (freedesktop.org), and macOS (NSUserNotification).
 
+## Setup
+
+```shell
+dotnet add package NativeNotification
+```
+
+## Quick Start
 ```csharp
 var manager = ManagerFactory.GetNotificationManager(new NativeNotificationOption() { AppName = "AppName" });
 var notification = manager.Create();
@@ -21,13 +28,13 @@ notification.Show(new NotificationDeliverOption() { Duration = TimeSpan.FromSeco
 | Message                       | ✅                          | ✅      | ✅            |
 | Duration                      | ✅                          | ✅      | ✅            |
 | Images                        | ✅                          | ✅      | ✅            |
+| Progress Bars                 | ✅                          | ❌️      | ❌️            |
 | Notification Actions          | ✅                          | ✅      | ✅            |
 | Clear Delivered Notifications | ✅                          | ✅      | ✅            |
 | Get Delivered Notifications   | ✅                          | ✅      | ✅            |
 | Replace Notifications         | ✅                          | ✅      | ✅            |
-| Progress Bar                  | ✅                          | ❌️      | ❌️            |
 
 ## Dependencies
 
-[Microsoft.Toolkit.Uwp.Notifications]([Microsoft.Toolkit.Uwp.Notifications](https://github.com/CommunityToolkit/WindowsCommunityToolkit/tree/main/Microsoft.Toolkit.Uwp.Notifications))  
+[Microsoft.Toolkit.Uwp.Notifications](https://github.com/CommunityToolkit/WindowsCommunityToolkit/tree/main/Microsoft.Toolkit.Uwp.Notifications)  
 [Tmds.DBus](https://github.com/tmds/Tmds.DBus)  
