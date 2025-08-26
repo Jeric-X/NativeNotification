@@ -38,10 +38,22 @@ namespace NativeNotification.Windows
             _tag = toast.Tag;
             _group = toast.Group;
             _manager = manager;
-            var dataMap = toast.Data.Values;
-            Title = dataMap[TOAST_BINDING_TITLE];
-            Message = dataMap[TOAST_BINDING_TEXT1];
-            Text2 = dataMap[TOAST_BINDING_TEXT2];
+            var dataMap = toast.Data?.Values;
+            if (dataMap is not null)
+            {
+                if (dataMap.TryGetValue(TOAST_BINDING_TITLE, out var title))
+                {
+                    Title = title;
+                }
+                if (dataMap.TryGetValue(TOAST_BINDING_TEXT1, out var text1))
+                {
+                    Message = text1;
+                }
+                if (dataMap.TryGetValue(TOAST_BINDING_TEXT2, out var text2))
+                {
+                    Text2 = text2;
+                }
+            }
             toast.Activated += Toast_Activated;
             toast.Dismissed += Toast_Dismissed;
             IsCreatedByCurrentProcess = false;
