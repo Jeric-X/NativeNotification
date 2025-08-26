@@ -1,3 +1,6 @@
+# v1.0.2
+- Fix null reference exception caused by notifications delivered from WIndows OS.
+
 # v1.0.1
 - Remove DBus dependency on macOS and Windows.
 - Fix macOS buttons on old OS versions.

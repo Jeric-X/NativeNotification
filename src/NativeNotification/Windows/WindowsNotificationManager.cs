@@ -40,6 +40,10 @@ public partial class WindowsNotificationManager : NotificationManagerBase
         var list = ToastNotificationManagerCompat.History.GetHistory();
         foreach (var toast in list)
         {
+            if (toast.Data is null)
+            {
+                continue;
+            }
             var notification = new ToastSession(this, toast);
             SessionHistory.AddSession(notification.NotificationId, notification);
         }
