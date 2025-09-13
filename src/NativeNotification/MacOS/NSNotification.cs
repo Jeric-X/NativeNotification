@@ -18,7 +18,14 @@ internal class NSNotification : INotification, INotificationInternal
         set
         {
             _imageUri = value;
-            _nsImage = new NSImage(value!);
+            if (value is not null)
+            {
+                _nsImage = new NSImage(value!);
+            }
+            else
+            {
+                _nsImage = null;
+            }
         }
     }
     public List<ActionButton> Buttons { get; set; } = [];

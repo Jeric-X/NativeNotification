@@ -1,3 +1,6 @@
+# v1.0.3
+- Fix exceptions when setting image to null on macOS.
+
 # v1.0.2
 - Fix null reference exception caused by notifications delivered from WIndows OS.
 
