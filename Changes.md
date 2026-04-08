@@ -1,3 +1,6 @@
+# v1.0.4
+- Bump Tmds.DBus to 0.92.0 to mitigate vulnerabilities.
+
 # v1.0.3
 - Fix exceptions when setting image to null on macOS.
 
