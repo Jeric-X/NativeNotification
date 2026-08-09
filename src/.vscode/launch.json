@@ -20,7 +20,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build macOS",
-            "program": "${workspaceFolder}/NativeNotification.Example/bin/Debug/net8.0-macos/osx-x64/NativeNotification.Example.app/Contents/MacOS/NativeNotification.Example",
+            "program": "${workspaceFolder}/NativeNotification.Example/bin/Debug/net10.0-macos/osx-arm64/NativeNotification.Example.app/Contents/MacOS/NativeNotification.Example",
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopAtEntry": false,

@@ -21,20 +21,22 @@ notification.Show(new NotificationDeliverOption() { Duration = TimeSpan.FromSeco
 
 ## Platform Support
 
-|                               | Windows                    | Linux  | macOS        |
-| ----------------------------- | -------------------------- | ------ | ------------ |
-| TFM requirements              | net8.0-windows10.0.17763.0 | net8.0 | net8.0-macos |
-| Title                         | ✅                          | ✅      | ✅            |
-| Message                       | ✅                          | ✅      | ✅            |
-| Duration                      | ✅                          | ✅      | ✅            |
-| Images                        | ✅                          | ✅      | ✅            |
-| Progress Bars                 | ✅                          | ❌️      | ❌️            |
-| Notification Actions          | ✅                          | ✅      | ✅            |
-| Clear Delivered Notifications | ✅                          | ✅      | ✅            |
-| Get Delivered Notifications   | ✅                          | ✅      | ✅            |
-| Replace Notifications         | ✅                          | ✅      | ✅            |
+|                               | Windows                    | Linux  | macOS          |
+| ----------------------------- | -------------------------- | ------ | -------------- |
+| TFM requirements              | net8.0-windows10.0.17763.0 | net8.0 | net10.0-macos  |
+| Minimum OS version            | Windows 10, version 1809   | —      | macOS 12        |
+| Title                         | ✅                          | ✅      | ✅              |
+| Message                       | ✅                          | ✅      | ✅              |
+| Duration                      | ✅                          | ✅      | ✅              |
+| Images                        | ✅                          | ✅      | ✅              |
+| Progress Bars                 | ✅                          | ❌️      | ❌️              |
+| Notification Actions          | ✅                          | ✅      | ✅              |
+| Clear Delivered Notifications | ✅                          | ✅      | ✅              |
+| Get Delivered Notifications   | ✅                          | ✅      | ✅              |
+| Replace Notifications         | ✅                          | ✅      | ✅              |
 
 ## Dependencies
 
-[Microsoft.Toolkit.Uwp.Notifications](https://github.com/CommunityToolkit/WindowsCommunityToolkit/tree/main/Microsoft.Toolkit.Uwp.Notifications)  
-[Tmds.DBus](https://github.com/tmds/Tmds.DBus)  
+[Microsoft.Toolkit.Uwp.Notifications](https://github.com/CommunityToolkit/WindowsCommunityToolkit/tree/main/Microsoft.Toolkit.Uwp.Notifications)
+
+[Tmds.DBus](https://github.com/tmds/Tmds.DBus)

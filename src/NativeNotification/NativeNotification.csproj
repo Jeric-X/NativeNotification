@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net8.0-windows10.0.17763.0;net8.0;net8.0-macos</TargetFrameworks>
+		<TargetFrameworks>net8.0-windows10.0.17763.0;net8.0;net10.0-macos</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<DebugType>embedded</DebugType>
@@ -16,17 +16,20 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(BuildOnMac)'=='true'">
-		<TargetFrameworks>net8.0-macos</TargetFrameworks>
+		<TargetFrameworks>net10.0-macos</TargetFrameworks>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(BuildOnLinux)'=='true'">
 		<TargetFrameworks>net8.0</TargetFrameworks>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(BuildOnWin)'=='true'">
-		<TargetFrameworks>net8.0-windows10.0.17763.0;net8.0;net8.0-macos</TargetFrameworks>
+		<TargetFrameworks>net8.0-windows10.0.17763.0;net8.0;net10.0-macos</TargetFrameworks>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-windows10.0.17763.0'">
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-macos'">
+		<SupportedOSPlatformVersion>12.0</SupportedOSPlatformVersion>
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows10.0.17763.0'">
@@ -42,7 +45,7 @@
 		<None Include="Linux/*" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' != 'net8.0-macos'">
+	<ItemGroup Condition="'$(TargetFramework)' != 'net10.0-macos'">
 		<Compile Remove="MacOS/*" />
 		<None Include="MacOS/*" />
 	</ItemGroup>

@@ -1,3 +1,7 @@
+# v1.0.5
+- Upgrade the macOS target framework to .NET 10 (`net10.0-macos`).
+- Raise the minimum supported macOS version to macOS 12.
+
 # v1.0.4
 - Bump Tmds.DBus to 0.92.0 to mitigate vulnerabilities.
 

@@ -13,7 +13,7 @@
 	<Import Project="../build/Description.props"/>
 
 	<PropertyGroup Condition="'$(BuildOnMac)'=='true'">
-		<TargetFramework>net8.0-macos</TargetFramework>
+		<TargetFramework>net10.0-macos</TargetFramework>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(BuildOnLinux)'=='true'">
 		<TargetFramework>net8.0</TargetFramework>
@@ -23,7 +23,7 @@
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(BuildOnMac)'=='true'">
 		<ApplicationId>xyz.jericx.nativeNotification.example</ApplicationId>
-		<SupportedOSPlatformVersion>10.15</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion>12.0</SupportedOSPlatformVersion>
 		<CreatePackage>false</CreatePackage>
 	</PropertyGroup>
 	<ItemGroup>
