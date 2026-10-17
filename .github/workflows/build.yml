@@ -25,6 +25,10 @@ jobs:
       working-directory: ./src
       run: dotnet format --verify-no-changes --no-restore  --severity info
 
+    - name: Test expiration behavior
+      working-directory: ./src
+      run: dotnet test NativeNotification.Tests/NativeNotification.Tests.csproj --no-restore
+
     - name: Generate change log
       run: ./.github/workflows/GenerateChangeLog.bat
 
