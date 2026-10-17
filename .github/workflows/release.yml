@@ -11,12 +11,12 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Download last-job-built change log
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: change-log
 
       - name: Download nupkgs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: nupkgs
           path: nupkgs

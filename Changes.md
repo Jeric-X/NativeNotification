@@ -1,3 +1,8 @@
+# v1.0.6
+- Fix previous expiration timers removing reused notifications early.
+- Cancel existing expiration when the nullable duration is cleared.
+- Update build and release actions to use Node.js 24.
+
 # v1.0.5
 - Upgrade the macOS target framework to .NET 10 (`net10.0-macos`).
 - Raise the minimum supported macOS version to macOS 12.
