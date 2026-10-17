@@ -35,7 +35,7 @@ public class ExpirationHelper(INotification session)
     private CancellationToken CreateNewDurationCtk()
     {
         var cts = new CancellationTokenSource();
-        var oldCts = Interlocked.Exchange(ref _durationCts, null);
+        var oldCts = Interlocked.Exchange(ref _durationCts, cts);
         oldCts?.Cancel();
         oldCts?.Dispose();
         return cts.Token;
@@ -58,9 +58,9 @@ public class ExpirationHelper(INotification session)
 
     public async void SetNoficifationDuration(TimeSpan? duration = null)
     {
+        var token = CreateNewDurationCtk();
         if (duration is not null)
         {
-            var token = CreateNewDurationCtk();
             try
             {
                 await Task.Delay(duration.Value, token).ConfigureAwait(false);
