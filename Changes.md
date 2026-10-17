@@ -1,6 +1,5 @@
 # v1.0.6
-- Fix notifications disappearing too early when shown again.
-- Fix notifications still disappearing after automatic removal is disabled.
+- Fix reused notifications being removed according to their previous expiration settings.
 
 # v1.0.5
 - Upgrade the macOS target framework to .NET 10 (`net10.0-macos`).
