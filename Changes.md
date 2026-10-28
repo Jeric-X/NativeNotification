@@ -1,3 +1,6 @@
+# v1.0.7
+- Explicitly reference System.Drawing.Common 4.7.2 on Windows to resolve the NU1904 warning.
+
 # v1.0.6
 - Fix reused notifications being removed according to their previous expiration settings.
 
